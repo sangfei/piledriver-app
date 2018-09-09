@@ -1,9 +1,24 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:async';
+import 'package:path_provider/path_provider.dart';
 
-class SettingPage extends StatelessWidget {
+class SettingPage extends StatefulWidget {
+  @override
+  State createState() => new _SettingPageState();
+}
+
+class _SettingPageState extends State<SettingPage> {
   final bindWebo = false;
   final bindWechat = false;
   final bindGitHub = false;
+
+Future<Null> _logOut() async {
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    await new File('$dir/LandingInformation').delete();
+    Navigator.pushNamed(context, '/login');
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -92,53 +107,11 @@ class SettingPage extends StatelessWidget {
                     width: 1.0, color: const Color(0xE3E3E3FF)),
               )),
             ),
-            new Container(
-              child: new SwitchListTile(
-                title: new Text('绑定GitHub'),
-                onChanged: null,
-                value: bindGitHub,
-              ),
-              margin: const EdgeInsets.only(bottom: 20.0),
-              decoration: const BoxDecoration(
-                  border: const Border(
-                bottom: const BorderSide(
-                    width: 1.0, color: const Color(0xE3E3E3FF)),
-              )),
-            ),
-            new Container(
-              child: new ListTile(
-                title: new Text('清理缓存'),
-                onTap: () {},
-                enabled: true,
-                trailing: new Icon(Icons.keyboard_arrow_right),
-              ),
-              margin: const EdgeInsets.only(top: 20.0),
-              decoration: const BoxDecoration(
-                  border: const Border(
-                top: const BorderSide(
-                    width: 1.0, color: const Color(0xE3E3E3FF)),
-                bottom: const BorderSide(
-                    width: 1.0, color: const Color(0xE3E3E3FF)),
-              )),
-            ),
-            new Container(
-              child: new ListTile(
-                title: new Text('设置新消息通知'),
-                onTap: () {},
-                enabled: true,
-                trailing: new Icon(Icons.keyboard_arrow_right),
-              ),
-              margin: const EdgeInsets.only(bottom: 20.0),
-              decoration: const BoxDecoration(
-                  border: const Border(
-                bottom: const BorderSide(
-                    width: 1.0, color: const Color(0xE3E3E3FF)),
-              )),
-            ),
+           
             new Container(
               child: new ListTile(
                 title: new Center(child: new Text('退出账号')),
-                onTap: () {},
+                onTap: () {_logOut();},
                 enabled: true,
               ),
               decoration: const BoxDecoration(

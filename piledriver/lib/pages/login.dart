@@ -5,6 +5,9 @@ import '../widget/common_snakeBar.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:io';
+import 'dart:convert';
+import 'package:path_provider/path_provider.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -26,8 +29,19 @@ class _LoginPageState extends State<LoginPage> {
 
   Timer _timer;
 
+  String name = "null";
+  String passwd = "null";
+
   @override
   void initState() {
+    _readLoginData().then((Map onValue) {
+      setState(() {
+        _phoneNum = onValue["name"];
+        _verifyCode = onValue["password"];
+      });
+      print("_phoneNum : $_phoneNum");
+      print("_verifyCode : $_verifyCode");
+    });
     super.initState();
   }
 
@@ -59,33 +73,82 @@ class _LoginPageState extends State<LoginPage> {
     _timer?.cancel();
   }
 
+  Future<Map> _readLoginData() async {
+    try {
+      /*
+       * 获取本地文件目录
+       * 关键字await表示等待操作完成
+       */
+      String dir = (await getApplicationDocumentsDirectory()).path;
+      File file = new File('$dir/LandingInformation');
+      String data = await file.readAsString();
+      print("read data is : $data");
+
+      Map json = new JsonDecoder().convert(data);
+      return json;
+    } on FileSystemException {
+      // 发生异常时返回默认值
+      print("read exception");
+      Map json = new JsonDecoder().convert('{"name":"","password":""}');
+      return json;
+    }
+  }
+
+  int _userLogIn(String name, String password) {
+    if ("123" == password) {
+      print("$name $password");
+      _saveLogin(name, password);
+      Navigator.pushNamed(context, '/index');
+      return 0;
+    } else {
+      print("_phoneNum wrong");
+      return 1;
+    }
+  }
+
+  Future<Null> _saveLogin(String name, String password) async {
+    try {
+      /*
+       * 获取本地文件目录
+       * 关键字await表示等待操作完成
+       */
+      String dir = (await getApplicationDocumentsDirectory()).path;
+      await new File('$dir/LandingInformation')
+          .writeAsString('{"name":"$name","password":"$password"}');
+      print("save success");
+    } on FileSystemException {
+      // 发生异常时返回默认值
+      print("save exception");
+    }
+  }
+
   Widget _buildCustomBar() {
     return new Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween, //子组件的排列方式为主轴两端对齐
       children: <Widget>[
-        new InkWell(
-          child: new Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: new Icon(
-                Icons.clear,
-                size: 26.0,
-                color: Colors.grey[700],
-              )),
-          onTap: () {
-            Navigator.pop(context);
-          },
-        ),
-        new InkWell(
-          child: new Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: new Text(
-                "密码登录",
-                style: new TextStyle(fontSize: 16.0, color: Colors.grey[700]),
-              )),
-          onTap: () {
-            showTips();
-          },
-        ),
+        // new InkWell(
+        //   child: new Padding(
+        //       padding: const EdgeInsets.all(12.0),
+        //       child: new Icon(
+        //         Icons.clear,
+        //         size: 26.0,
+        //         color: Colors.grey[700],
+        //       )),
+        //   onTap: () {
+        //     Navigator.pop(context);
+        //   },
+        // ),
+        // new InkWell(
+        //   child: new Padding(
+        //       padding: const EdgeInsets.all(12.0),
+        //       child: new Text(
+        //         "密码登录",
+        //         style: new TextStyle(fontSize: 16.0, color: Colors.grey[700]),
+        //       )),
+        //   onTap: () {
+        //     showTips();
+        //   },
+        // ),
       ],
     );
   }
@@ -100,10 +163,13 @@ class _LoginPageState extends State<LoginPage> {
           setState(() {});
         },
         decoration: new InputDecoration(
-          hintText: '请输入手机号',
+          hintText: '请输入用户名',
+          icon: new Icon(
+            Icons.phone,
+          ),
         ),
         maxLines: 1,
-        maxLength: 11,
+        maxLength: 12,
         //键盘展示为号码
         keyboardType: TextInputType.phone,
         //只能输入数字
@@ -125,16 +191,20 @@ class _LoginPageState extends State<LoginPage> {
         setState(() {});
       },
       decoration: new InputDecoration(
-        hintText: '请输入短信验证码',
+        hintText: '请输入密码',
+        icon: new Icon(
+          Icons.lock_outline,
+        ),
       ),
       maxLines: 1,
-      maxLength: 6,
-      //键盘展示为数字
-      keyboardType: TextInputType.number,
-      //只能输入数字
-      inputFormatters: <TextInputFormatter>[
-        WhitelistingTextInputFormatter.digitsOnly,
-      ],
+      maxLength: 12,
+      obscureText: true,
+      // //键盘展示为数字
+      // keyboardType: TextInputType.number,
+      // //只能输入数字
+      // inputFormatters: <TextInputFormatter>[
+      //   WhitelistingTextInputFormatter.digitsOnly,
+      // ],
       onSubmitted: (text) {
         FocusScope.of(context).reparentIfNeeded(node);
       },
@@ -170,10 +240,10 @@ class _LoginPageState extends State<LoginPage> {
       child: new Stack(
         children: <Widget>[
           verifyCodeEdit,
-          new Align(
-            alignment: Alignment.topRight,
-            child: verifyCodeBtn,
-          ),
+          // new Align(
+          //   alignment: Alignment.topRight,
+          //   child: verifyCodeBtn,
+          // ),
         ],
       ),
     );
@@ -184,7 +254,7 @@ class _LoginPageState extends State<LoginPage> {
       margin: const EdgeInsets.only(top: 40.0, bottom: 20.0),
       alignment: Alignment.center,
       child: new Text(
-        "登录知乎日报，体验更多功能",
+        "登录桩机管理系统",
         style: new TextStyle(fontSize: 24.0),
       ),
     );
@@ -197,9 +267,11 @@ class _LoginPageState extends State<LoginPage> {
         color: Colors.blue,
         textColor: Colors.white,
         disabledColor: Colors.blue[100],
-        onPressed: (_phoneNum.isEmpty || _verifyCode.isEmpty) ? null : () {
-          showTips();
-        },
+        onPressed: (_phoneNum.isEmpty || _verifyCode.isEmpty)
+            ? null
+            : () {
+                _userLogIn(_phoneNum, _verifyCode);
+              },
         child: new Text(
           "登  录",
           style: new TextStyle(fontSize: 16.0),
@@ -258,7 +330,8 @@ class _LoginPageState extends State<LoginPage> {
 
   Widget _buildProtocol() {
     return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0,bottom: 20.0),
+      padding: const EdgeInsets.only(
+          left: 40.0, right: 40.0, top: 10.0, bottom: 20.0),
       child: new Container(
         child: new Text.rich(
           new TextSpan(
@@ -305,7 +378,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildBody(){
+  Widget _buildBody() {
     return new ListView(
       children: <Widget>[
         _buildCustomBar(),
@@ -313,13 +386,12 @@ class _LoginPageState extends State<LoginPage> {
         _buildPhoneEdit(),
         _buildVerifyCodeEdit(),
         _buildRegist(),
-        _buildTips(),
-        _buildThirdPartLogin(),
-        _buildProtocol(),
+        // _buildTips(),
+        // _buildThirdPartLogin(),
+        // _buildProtocol(),
       ],
     );
   }
-
 
   showTips() {
     showModalBottomSheet<void>(
