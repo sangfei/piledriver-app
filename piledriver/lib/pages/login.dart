@@ -1,13 +1,11 @@
 import 'dart:async';
-
-import '../model/menu_model.dart';
-import '../widget/common_snakeBar.dart';
-import 'package:flutter/gestures.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
-import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
+import './index.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -20,17 +18,7 @@ class _LoginPageState extends State<LoginPage> {
   GlobalKey<ScaffoldState> registKey = new GlobalKey();
 
   String _phoneNum = '';
-
   String _verifyCode = '';
-
-  int _seconds = 0;
-
-  String _verifyStr = '获取验证码';
-
-  Timer _timer;
-
-  String name = "null";
-  String passwd = "null";
 
   @override
   void initState() {
@@ -39,8 +27,6 @@ class _LoginPageState extends State<LoginPage> {
         _phoneNum = onValue["name"];
         _verifyCode = onValue["password"];
       });
-      print("_phoneNum : $_phoneNum");
-      print("_verifyCode : $_verifyCode");
     });
     super.initState();
   }
@@ -48,29 +34,21 @@ class _LoginPageState extends State<LoginPage> {
   @override
   void dispose() {
     super.dispose();
-    _cancelTimer();
   }
 
-  _startTimer() {
-    _seconds = 10;
+  getUserProfile() async {
+    final response =
+        await http.get('http://49.4.54.72:32500/api/v1/stuff?phone=$_phoneNum');
+    if (response.statusCode == 200) {
+      var resp = json.decode(response.body);
+      print('======================resp $resp');
 
-    _timer = new Timer.periodic(new Duration(seconds: 1), (timer) {
-      if (_seconds == 0) {
-        _cancelTimer();
-        return;
-      }
-
-      _seconds--;
-      _verifyStr = '$_seconds(s)';
-      setState(() {});
-      if (_seconds == 0) {
-        _verifyStr = '重新发送';
-      }
-    });
-  }
-
-  _cancelTimer() {
-    _timer?.cancel();
+      return resp['pwd'];
+    } else {
+      print('======================resp error');
+      print("get user profile error");
+      return "";
+    }
   }
 
   Future<Map> _readLoginData() async {
@@ -82,7 +60,6 @@ class _LoginPageState extends State<LoginPage> {
       String dir = (await getApplicationDocumentsDirectory()).path;
       File file = new File('$dir/LandingInformation');
       String data = await file.readAsString();
-      print("read data is : $data");
 
       Map json = new JsonDecoder().convert(data);
       return json;
@@ -94,16 +71,24 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  int _userLogIn(String name, String password) {
-    if ("123" == password) {
-      print("$name $password");
-      _saveLogin(name, password);
-      Navigator.pushNamed(context, '/index');
-      return 0;
-    } else {
-      print("_phoneNum wrong");
-      return 1;
-    }
+  _userLogIn(String name, String password) {
+    getUserProfile().then((value) {
+      var userpwd = value;
+
+      print('==============getpasswd===========$userpwd');
+      if (userpwd == password) {
+        print("$name $password");
+        _saveLogin(name, password);
+        // 清除导航纪录
+        Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+          builder: (BuildContext context) {
+            return new IndexPage();
+          },
+        ), (route) => route == null);
+      } else {
+        showTips();
+      }
+    });
   }
 
   Future<Null> _saveLogin(String name, String password) async {
@@ -122,37 +107,6 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Widget _buildCustomBar() {
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween, //子组件的排列方式为主轴两端对齐
-      children: <Widget>[
-        // new InkWell(
-        //   child: new Padding(
-        //       padding: const EdgeInsets.all(12.0),
-        //       child: new Icon(
-        //         Icons.clear,
-        //         size: 26.0,
-        //         color: Colors.grey[700],
-        //       )),
-        //   onTap: () {
-        //     Navigator.pop(context);
-        //   },
-        // ),
-        // new InkWell(
-        //   child: new Padding(
-        //       padding: const EdgeInsets.all(12.0),
-        //       child: new Text(
-        //         "密码登录",
-        //         style: new TextStyle(fontSize: 16.0, color: Colors.grey[700]),
-        //       )),
-        //   onTap: () {
-        //     showTips();
-        //   },
-        // ),
-      ],
-    );
-  }
-
   Widget _buildPhoneEdit() {
     var node = new FocusNode();
     return new Padding(
@@ -169,7 +123,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
         maxLines: 1,
-        maxLength: 12,
+        maxLength: 11,
         //键盘展示为号码
         keyboardType: TextInputType.phone,
         //只能输入数字
@@ -197,7 +151,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       ),
       maxLines: 1,
-      maxLength: 12,
+      // maxLength: 12,
       obscureText: true,
       // //键盘展示为数字
       // keyboardType: TextInputType.number,
@@ -208,31 +162,6 @@ class _LoginPageState extends State<LoginPage> {
       onSubmitted: (text) {
         FocusScope.of(context).reparentIfNeeded(node);
       },
-    );
-
-    Widget verifyCodeBtn = new InkWell(
-      onTap: (_seconds == 0)
-          ? () {
-              setState(() {
-                _startTimer();
-              });
-            }
-          : null,
-      child: new Container(
-        alignment: Alignment.center,
-        width: 100.0,
-        height: 36.0,
-        decoration: new BoxDecoration(
-          border: new Border.all(
-            width: 1.0,
-            color: Colors.blue,
-          ),
-        ),
-        child: new Text(
-          '$_verifyStr',
-          style: new TextStyle(fontSize: 14.0),
-        ),
-      ),
     );
 
     return new Padding(
@@ -280,108 +209,9 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildTips() {
-    return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 20.0),
-      child: new Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, //子组件的排列方式为主轴两端对齐
-        children: <Widget>[
-          new Text(
-            "未注册手机验证后自动登录",
-            style: new TextStyle(fontSize: 14.0, color: Colors.grey[500]),
-          ),
-          new Text(
-            "需要帮助",
-            style: new TextStyle(fontSize: 14.0, color: Colors.blue),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildThirdPartLogin() {
-    return new Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: menus_login.map((Menu m) {
-        return new GestureDetector(
-          onTap: () {
-            switch (m.index) {
-              case 0:
-                CommonSnakeBar.buildSnakeBarByKey(registKey, context, '点击了微信');
-                break;
-              case 1:
-                CommonSnakeBar.buildSnakeBarByKey(
-                    registKey, context, '点击了新浪微博');
-                break;
-            }
-          },
-          child: new Padding(
-              padding: const EdgeInsets.only(
-                  left: 24.0, top: 60.0, bottom: 12.0, right: 24.0),
-              child: new Image.asset(
-                m.icon,
-                width: 60.0,
-                height: 60.0,
-              )),
-        );
-      }).toList(),
-    );
-  }
-
-  Widget _buildProtocol() {
-    return new Padding(
-      padding: const EdgeInsets.only(
-          left: 40.0, right: 40.0, top: 10.0, bottom: 20.0),
-      child: new Container(
-        child: new Text.rich(
-          new TextSpan(
-              text: '注册知乎日报代表你已阅读并同意 ',
-              style: new TextStyle(
-                  fontSize: 14.0,
-                  color: Colors.grey[500],
-                  fontWeight: FontWeight.w400),
-              children: [
-                new TextSpan(
-                    recognizer: new TapGestureRecognizer()
-                      ..onTap = () {
-                        CommonSnakeBar.buildSnakeBarByKey(
-                            registKey, context, '点击了知乎协议');
-                      },
-                    text: '知乎协议',
-                    style: new TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w400,
-                    )),
-                new TextSpan(
-                    text: ' 和 ',
-                    style: new TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.grey[500],
-                      fontWeight: FontWeight.w400,
-                    )),
-                new TextSpan(
-                    recognizer: new TapGestureRecognizer()
-                      ..onTap = () {
-                        CommonSnakeBar.buildSnakeBarByKey(
-                            registKey, context, '点击了隐私政策');
-                      },
-                    text: '隐私政策',
-                    style: new TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.blue,
-                      fontWeight: FontWeight.w400,
-                    )),
-              ]),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBody() {
     return new ListView(
       children: <Widget>[
-        _buildCustomBar(),
         _buildLabel(),
         _buildPhoneEdit(),
         _buildVerifyCodeEdit(),
@@ -400,7 +230,7 @@ class _LoginPageState extends State<LoginPage> {
           return new Container(
               child: new Padding(
                   padding: const EdgeInsets.all(32.0),
-                  child: new Text('没有相关接口，这是一个纯UI界面，提供部分交互体验',
+                  child: new Text('用户名或密码错误',
                       textAlign: TextAlign.center,
                       style: new TextStyle(
                           color: Theme.of(context).accentColor,

@@ -4,6 +4,8 @@ import 'dart:async';
 import 'package:path_provider/path_provider.dart';
 import 'pages/index.dart';
 import 'pages/login.dart';
+import 'pages/stufflist.dart';
+import 'pages/addStuff.dart';
 
 void main() {
   _getLandingFile().then((onValue) {
@@ -49,6 +51,8 @@ class MyApp extends StatelessWidget {
         routes: <String, WidgetBuilder>{
           '/login': (BuildContext context) => LoginPage(),
           '/index': (BuildContext context) => IndexPage(),
+          '/stuff': (BuildContext context) => StuffList(),
+          '/addStuff': (BuildContext context) => AddStuff(),
         });
   }
 }

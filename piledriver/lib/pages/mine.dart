@@ -19,7 +19,7 @@ class MinePage extends StatelessWidget {
                   child: new Icon(Icons.person,color: Colors.white),
                   backgroundColor: Colors.grey,
                 ),
-                title: new Text('登录/注册'),
+                title: new Text('个人信息'),
                 enabled: true,
                 trailing: new Icon(Icons.keyboard_arrow_right),
                 onTap: (){
@@ -69,7 +69,7 @@ class MinePage extends StatelessWidget {
                 title: new Text('人员管理'),
                 enabled: true,
                 onTap: () {
-                  print('active2');
+                   Navigator.pushNamed(context, '/stuff');
                 },
               ),
               decoration: const BoxDecoration(
