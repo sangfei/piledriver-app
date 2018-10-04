@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
+import 'package:piledriver/pages/LoginPage.dart';
 
 class SettingPage extends StatefulWidget {
   @override
@@ -16,7 +17,11 @@ class _SettingPageState extends State<SettingPage> {
 Future<Null> _logOut() async {
     String dir = (await getApplicationDocumentsDirectory()).path;
     await new File('$dir/LandingInformation').delete();
-    Navigator.pushNamed(context, '/login');
+    Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+          builder: (BuildContext context) {
+            return new LoginPage();
+          },
+        ), (route) => route == null);
   }
 
 

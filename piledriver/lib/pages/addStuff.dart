@@ -2,9 +2,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-
-
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 class AddStuff extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
@@ -22,6 +20,7 @@ class AddStuffState extends State<AddStuff> {
   String _phoneNum = '';
   String _verifyCode = '';
 
+  
 
   addUserProfile() async {
     final response =
@@ -71,76 +70,6 @@ class AddStuffState extends State<AddStuff> {
     );
   }
 
-  Widget _buildPhoneEdit() {
-    var node = new FocusNode();
-    return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-      child: new TextField(
-        onChanged: (str) {
-          _phoneNum = str;
-          setState(() {});
-        },
-        decoration: new InputDecoration(
-          hintText: '请输入用户名',
-          icon: new Icon(
-            Icons.phone,
-          ),
-        ),
-        maxLines: 1,
-        maxLength: 11,
-        //键盘展示为号码
-        keyboardType: TextInputType.phone,
-        //只能输入数字
-        inputFormatters: <TextInputFormatter>[
-          WhitelistingTextInputFormatter.digitsOnly,
-        ],
-        onSubmitted: (text) {
-          FocusScope.of(context).reparentIfNeeded(node);
-        },
-      ),
-    );
-  }
-
-  Widget _buildVerifyCodeEdit() {
-    var node = new FocusNode();
-    Widget verifyCodeEdit = new TextField(
-      onChanged: (str) {
-        _verifyCode = str;
-        setState(() {});
-      },
-      decoration: new InputDecoration(
-        hintText: '请输入密码',
-        icon: new Icon(
-          Icons.lock_outline,
-        ),
-      ),
-      maxLines: 1,
-      // maxLength: 12,
-      obscureText: true,
-      // //键盘展示为数字
-      // keyboardType: TextInputType.number,
-      // //只能输入数字
-      // inputFormatters: <TextInputFormatter>[
-      //   WhitelistingTextInputFormatter.digitsOnly,
-      // ],
-      onSubmitted: (text) {
-        FocusScope.of(context).reparentIfNeeded(node);
-      },
-    );
-
-    return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
-      child: new Stack(
-        children: <Widget>[
-          verifyCodeEdit,
-          // new Align(
-          //   alignment: Alignment.topRight,
-          //   child: verifyCodeBtn,
-          // ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildLabel() {
     return new Container(
@@ -224,22 +153,34 @@ Widget _buildSex() {
     var node = new FocusNode();
     return new Padding(
       padding: const EdgeInsets.only(left: 40.0, right: 40.0),
-      child: new TextField(
-        onChanged: (str) {
-          _birth = str;
-          setState(() {});
-        },
-        decoration: new InputDecoration(
-          hintText: '出生日期',
-          icon: new Icon(
-            Icons.date_range,
-          ),
-        ),
-        maxLines: 1,
-        onSubmitted: (text) {
-          FocusScope.of(context).reparentIfNeeded(node);
-        },
-      ),
+      child: FlatButton(
+    onPressed: () {
+        DatePicker.showDateTimePicker(context, showTitleActions: true, onChanged: (date) {
+            print('change $date');
+        }, onConfirm: (date) {
+            print('confirm $date');
+        }, currentTime: DateTime(2008, 12, 31, 23, 12, 34), locale: 'zh');
+    },
+    child: Text(
+        'show date time picker (Chinese)',
+        style: TextStyle(color: Colors.blue),
+    )),
+      // child: new TextField(
+      //   onChanged: (str) {
+      //     _birth = str;
+      //     setState(() {});
+      //   },
+      //   decoration: new InputDecoration(
+      //     hintText: '出生日期',
+      //     icon: new Icon(
+      //       Icons.date_range,
+      //     ),
+      //   ),
+      //   maxLines: 1,
+      //   onSubmitted: (text) {
+      //     FocusScope.of(context).reparentIfNeeded(node);
+      //   },
+      // ),
     );
   } 
 

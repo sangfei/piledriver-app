@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:path_provider/path_provider.dart';
-import 'pages/index.dart';
-import 'pages/login.dart';
+import 'package:piledriver/MainPage.dart';
+import 'pages/LoginPage.dart';
 import 'pages/stufflist.dart';
 import 'pages/addStuff.dart';
 
@@ -47,10 +47,10 @@ class MyApp extends StatelessWidget {
                 //设置文本样式
                 // display1: new TextStyle(color: Colors.deepPurple, fontSize:12.0),
                 title: new TextStyle(color: Colors.black, fontSize: 16.0))),
-        home: landing ? new IndexPage() : new LoginPage(),
+        home: landing ? new MainPage() : new LoginPage(),
         routes: <String, WidgetBuilder>{
           '/login': (BuildContext context) => LoginPage(),
-          '/index': (BuildContext context) => IndexPage(),
+
           '/stuff': (BuildContext context) => StuffList(),
           '/addStuff': (BuildContext context) => AddStuff(),
         });

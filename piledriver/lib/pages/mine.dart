@@ -1,8 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:piledriver/pages/stuffListPage.dart';
+
 import 'settings.dart';
 
-class MinePage extends StatelessWidget {
+class MinePage extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() {
+    return new MinePageState();
+  }
+}
+
+class MinePageState extends State<MinePage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -10,20 +19,22 @@ class MinePage extends StatelessWidget {
       theme: new ThemeData(primaryColor: Colors.blue),
       home: new Scaffold(
           appBar: new CupertinoNavigationBar(
-            middle: new Text('我',style: new TextStyle(fontWeight: FontWeight.normal),),
+            middle: new Text(
+              '我',
+              style: new TextStyle(fontWeight: FontWeight.normal),
+            ),
           ),
           body: new ListView(children: <Widget>[
             new Container(
               child: new ListTile(
                 leading: new CircleAvatar(
-                  child: new Icon(Icons.person,color: Colors.white),
+                  child: new Icon(Icons.person, color: Colors.white),
                   backgroundColor: Colors.grey,
                 ),
                 title: new Text('个人信息'),
                 enabled: true,
                 trailing: new Icon(Icons.keyboard_arrow_right),
-                onTap: (){
-                  Navigator.pushNamed(context, '/login');
+                onTap: () {
                 },
               ),
               padding: new EdgeInsets.only(top: 15.0, bottom: 15.0),
@@ -69,8 +80,10 @@ class MinePage extends StatelessWidget {
                 title: new Text('人员管理'),
                 enabled: true,
                 onTap: () {
-                   Navigator.pushNamed(context, '/stuff');
-                },
+                  Navigator.push(context, new MaterialPageRoute(builder: (context) {
+                    return new StuffListPage();
+                  }));
+                }
               ),
               decoration: const BoxDecoration(
                   border: const Border(

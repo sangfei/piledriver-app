@@ -5,7 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import './index.dart';
+import 'package:piledriver/MainPage.dart';
+import 'package:flutter/material.dart';
+import 'package:piledriver/common/config/Config.dart';
+import 'package:piledriver/common/local/LocalStorage.dart';
+import 'package:piledriver/common/style/GSYStyle.dart';
+import 'package:piledriver/widget/GSYFlexButton.dart';
+import 'package:piledriver/widget/GSYInputWidget.dart';
+import 'package:piledriver/common/constant.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -19,7 +26,8 @@ class _LoginPageState extends State<LoginPage> {
 
   String _phoneNum = '';
   String _verifyCode = '';
-
+  final TextEditingController userController = new TextEditingController();
+  final TextEditingController pwController = new TextEditingController();
   @override
   void initState() {
     _readLoginData().then((Map onValue) {
@@ -38,7 +46,7 @@ class _LoginPageState extends State<LoginPage> {
 
   getUserProfile() async {
     final response =
-        await http.get('http://49.4.54.72:32500/api/v1/stuff?phone=$_phoneNum');
+        await http.get(Constant.baseUrl + '/api/v1/stuff?phone=$_phoneNum');
     if (response.statusCode == 200) {
       var resp = json.decode(response.body);
       print('======================resp $resp');
@@ -82,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
         // 清除导航纪录
         Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
           builder: (BuildContext context) {
-            return new IndexPage();
+            return new MainPage();
           },
         ), (route) => route == null);
       } else {
@@ -110,7 +118,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget _buildPhoneEdit() {
     var node = new FocusNode();
     return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0),
+      padding: const EdgeInsets.only(left: 5.0, right: 5.0),
       child: new TextField(
         onChanged: (str) {
           _phoneNum = str;
@@ -165,7 +173,7 @@ class _LoginPageState extends State<LoginPage> {
     );
 
     return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 10.0),
+      padding: const EdgeInsets.only(left: 5.0, right: 5.0, top: 10.0),
       child: new Stack(
         children: <Widget>[
           verifyCodeEdit,
@@ -210,17 +218,82 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildBody() {
-    return new ListView(
-      children: <Widget>[
-        _buildLabel(),
-        _buildPhoneEdit(),
-        _buildVerifyCodeEdit(),
-        _buildRegist(),
-        // _buildTips(),
-        // _buildThirdPartLogin(),
-        // _buildProtocol(),
-      ],
-    );
+    return new Container(
+        color: Colors.amber[200],
+        child: new Center(
+            child: new Card(
+                elevation: 5.0,
+                shape: new RoundedRectangleBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0))),
+                color: Colors.white,
+                margin: const EdgeInsets.all(30.0),
+                child: new Padding(
+                    padding: new EdgeInsets.only(
+                        left: 30.0, top: 40.0, right: 30.0, bottom: 80.0),
+                    // child: 
+                    // new ListView(
+                    //   children: <Widget>[
+                    //     _buildLabel(),
+                    //     _buildPhoneEdit(),
+                    //     _buildVerifyCodeEdit(),
+                    //     _buildRegist(),
+                    //     // _buildTips(),
+                    //     // _buildThirdPartLogin(),
+                    //     // _buildProtocol(),
+                    //   ],
+                    // )
+                    child: new Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    new Image(image: new AssetImage(GSYICons.DEFAULT_USER_ICON), width: 90.0, height: 90.0),
+                    new Padding(padding: new EdgeInsets.all(10.0)),
+                    new GSYInputWidget(
+                      hintText: "请输入手机号",
+                      iconData: GSYICons.LOGIN_USER,
+                      onChanged: (String value) {
+                        _phoneNum = value;
+                      },
+                      controller: userController,
+                    ),
+                    new Padding(padding: new EdgeInsets.all(10.0)),
+                    new GSYInputWidget(
+                      hintText: "请输入密码",
+                      iconData: GSYICons.LOGIN_PW,
+                      obscureText: true,
+                      onChanged: (String value) {
+                        _verifyCode = value;
+                      },
+                      controller: pwController,
+                    ),
+                    new Padding(padding: new EdgeInsets.all(30.0)),
+                    new GSYFlexButton(
+                      text: "登录",
+                      color: Theme.of(context).primaryColor,
+                      textColor: Color(GSYColors.textWhite),
+                      onPress: () {
+                        if (_phoneNum == null || _phoneNum.length == 0) {
+                          return;
+                        }
+                        if (_verifyCode == null || _verifyCode.length == 0) {
+                          return;
+                        }
+                         _userLogIn(_phoneNum, _verifyCode);
+                        // CommonUtils.showLoadingDialog(context);
+                        // UserDao.login(_userName.trim(), _password.trim(), store).then((res) {
+                        //   Navigator.pop(context);
+                        //   if (res != null && res.result) {
+                        //     new Future.delayed(const Duration(seconds: 1), () {
+                        //       NavigatorUtils.goHome(context);
+                        //       return true;
+                        //     });
+                        //   }
+                        // });
+                      },
+                    )
+                  ],
+                )
+                    ))));
   }
 
   showTips() {
@@ -243,7 +316,7 @@ class _LoginPageState extends State<LoginPage> {
     return new Material(
       child: new Scaffold(
         key: registKey,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blueGrey,
         body: _buildBody(),
       ),
     );
