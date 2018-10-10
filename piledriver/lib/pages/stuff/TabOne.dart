@@ -28,7 +28,7 @@ class TabOneState extends State<TabOne> {
         child: new CircularProgressIndicator(),
       );
     } else {
-      content = new ListView(children: buildMovieItems());
+      content = new ListView(children: buildStuffItems());
     }
     return new Scaffold(
       body: content,
@@ -54,13 +54,10 @@ class TabOneState extends State<TabOne> {
         datas = StuffBean.decodeData(jsonData);
       });
     }
-    var castsAcatars = datas[0].name;
-    print("castsAcatars");
-    print("第一个条目的数据：" + castsAcatars);
   }
 
   // 每个条目的信息
-  buildMovieItems() {
+  buildStuffItems() {
     List<Widget> widgets = [];
     for (int i = 0; i < datas.length; i++) {
       StuffBean data = datas[i];
@@ -88,8 +85,9 @@ class TabOneState extends State<TabOne> {
   }
 
   buildImage(StuffBean data) {
-    var src="https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2535191502.jpg";
-    return new Padding(
+        var imgname = "S${data.stuffID}";
+    var src = Constant.baseUrl + "image/load/$imgname.jpg";
+     return new Padding(
       padding: const EdgeInsets.only(
         top: 10.0,
         left: 10.0,
@@ -98,8 +96,8 @@ class TabOneState extends State<TabOne> {
       ),
       child: new Image.network(
         src,
-        width: 140.0,
-        height: 160.0,
+        width: 80.0,
+        height: 100.0,
       ),
     );
   }
@@ -119,7 +117,7 @@ class TabOneState extends State<TabOne> {
         new Text("性别：" + data.sex),
         new Text("生日：" + data.birth),
         new Text("电话：" + data.phone),
-        new Text("密码：" + data.pwd),
+        // new Text("密码：" + data.pwd),
         // new Text(data.total),
         // new Text(data.ratingAverage),
         // new Text(

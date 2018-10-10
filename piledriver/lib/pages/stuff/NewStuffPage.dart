@@ -7,25 +7,35 @@ import 'package:piledriver/common/style/GSYStyle.dart';
 import 'package:piledriver/widget/GSYFlexButton.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:async/async.dart';
+import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:piledriver/common/constant.dart';
-class NewProjectPage extends StatefulWidget {
+import 'package:async/async.dart';
+import 'package:intl/intl.dart';
+
+class NewStuffPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new NewProjectPageState();
+    return new NewStuffPageState();
   }
 }
 
-class NewProjectPageState extends State<NewProjectPage> {
+class NewStuffPageState extends State<NewStuffPage> {
   GlobalKey<ScaffoldState> registKey = new GlobalKey();
   List<File> fileList = new List();
   Future<File> _imageFile;
+  int sexValue;
+  int titleValue;
   bool isLoading = false;
   String msg = "";
-  String _projectName = '';
-  String _projectDesc = '';
-  // final TextEditingController userController = new TextEditingController();
-  // final TextEditingController pwController = new TextEditingController();
+  String _name = '';
+  int _sex;
+  String _birth = '请选择日期';
+  int _title;
+  String _phoneNum = '';
+
+  final TextEditingController _namecontroller = new TextEditingController();
+  final TextEditingController _phonecontroller = new TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -36,17 +46,75 @@ class NewProjectPageState extends State<NewProjectPage> {
     super.dispose();
   }
 
-  Widget projectNameFiled() {
+  Widget radioFiled(param1, param2, int function) {
+    return new Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        new Radio(
+          value: 1,
+          groupValue: function == 0 ? sexValue : titleValue,
+          onChanged: (int e) => updateGroupValue(function, e),
+        ),
+        new Text(
+          '$param1',
+          style: new TextStyle(fontSize: 12.0),
+        ),
+        new Radio(
+          value: 2,
+          groupValue: function == 0 ? sexValue : titleValue,
+          onChanged: (int e) => updateGroupValue(function, e),
+        ),
+        new Text(
+          '$param2',
+          style: new TextStyle(
+            fontSize: 12.0,
+          ),
+        ),
+      ],
+    );
+  }
+
+  void updateGroupValue(int function, int e) {
+    setState(() {
+      if (function == 0) {
+        _sex = e;
+        sexValue = e;
+      } else {
+        _title = e;
+        titleValue = e;
+      }
+    });
+  }
+
+  Widget nameFiled() {
+    return new TextField(
+      controller: _namecontroller,
+      decoration: new InputDecoration(
+        hintText: '姓名',
+      ),
+    );
+  }
+
+  Widget phoneFiled() {
+    return new TextField(
+      controller: _phonecontroller,
+      decoration: new InputDecoration(
+        hintText: '手机号',
+      ),
+    );
+  }
+
+  Widget stuffNameFiled() {
     var node = new FocusNode();
     return new TextField(
       style: new TextStyle(color: Colors.black, fontSize: 16.00),
       onChanged: (str) {
-        _projectName = str;
+        _name = str;
         setState(() {});
       },
       decoration: new InputDecoration(
         contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-        hintText: "请输入项目名称，不超过24个字",
+        hintText: "请输入姓名",
         hintStyle:
             new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
         // border: new OutlineInputBorder(
@@ -61,46 +129,6 @@ class NewProjectPageState extends State<NewProjectPage> {
         FocusScope.of(context).reparentIfNeeded(node);
       },
     );
-  }
-
-  Widget projectDescFiled() {
-    var node = new FocusNode();
-    return new TextField(
-      style: new TextStyle(color: Colors.black, fontSize: 16.00),
-      onChanged: (str) {
-        _projectDesc = str;
-        setState(() {});
-      },
-      decoration: new InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-          hintText: "请输入项目描述，不超过128个字",
-          hintStyle:
-              new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
-          border: new OutlineInputBorder(
-              borderRadius:
-                  const BorderRadius.all(const Radius.circular(5.0)))),
-      maxLines: 8,
-      maxLength: 128,
-      obscureText: false,
-      onSubmitted: (text) {
-        FocusScope.of(context).reparentIfNeeded(node);
-      },
-    );
-  }
-
-  showTips() {
-    showModalBottomSheet<void>(
-        context: context,
-        builder: (BuildContext context) {
-          return new Container(
-              child: new Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: new Text('用户名或密码错误',
-                      textAlign: TextAlign.center,
-                      style: new TextStyle(
-                          color: Theme.of(context).accentColor,
-                          fontSize: 24.0))));
-        });
   }
 
   @override
@@ -176,52 +204,103 @@ class NewProjectPageState extends State<NewProjectPage> {
       },
     );
     var children = [
-      new Text(
-        "创建新的项目",
+       new Text(
+        "增加新员工",
         style: new TextStyle(fontSize: 24.0),
       ),
-      new Row(
+       new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          new Text(
+            "姓名:",
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          Padding(padding: new EdgeInsets.only(left: 20.0)),
+          new Flexible(child: nameFiled()),
+        ],
+      ),
+       new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: <Widget>[
+          new Text(
+            "手机:",
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          Padding(padding: new EdgeInsets.only(left: 20.0)),
+          new Flexible(child: phoneFiled()),
+        ],
+      ),
+       new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          new Text(
+            "职务:",
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          // Padding(padding: new EdgeInsets.only(left: 20.0)),
+          new Flexible(child: radioFiled('技术员', '组长', 1)),
+        ],
+      ),
+       new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          new Text(
+            "性别:",
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          // Padding(padding: new EdgeInsets.only(left: 20.0)),
+          new Flexible(child: radioFiled('男', '女', 0)),
+        ],
+      ),
+       new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          new Text(
+            "生日:",
+            style: new TextStyle(fontSize: 16.0),
+          ),
+          Padding(padding: new EdgeInsets.only(left: 20.0)),
+          new FlatButton(
+              onPressed: () {
+                DatePicker.showDatePicker(context,
+                    showTitleActions: true,
+                    onChanged: (date) {}, onConfirm: (date) {
+                  setState(() {
+                    _birth = DateFormat('yyyy-MM-dd').format(date);
+                  });
+                }, currentTime: DateTime(2008, 12, 31), locale: 'zh');
+              },
+              child: Text(
+                '$_birth',
+                style: TextStyle(color: Colors.blue),
+              )),
+        ],
+      ),
+       new Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Text(
-            "项目名称：",
-            style: new TextStyle(fontSize: 14.0),
+            "添加头像(只能上传一张):",
+            style: new TextStyle(fontSize: 16.0),
           ),
           Padding(padding: new EdgeInsets.only(left: 20.0)),
         ],
       ),
-      new Container(child: projectNameFiled()),
-
-      new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Text(
-            "项目描述：",
-            style: new TextStyle(fontSize: 14.0),
-          ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
-        ],
-      ),
-      new Container(height: 100.0, child: projectDescFiled()),
-                      Padding(padding: new EdgeInsets.only(bottom: 20.0)),
-
-      new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Text(
-            "添加项目图片(只能上传一张):",
-            style: new TextStyle(fontSize: 14.0),
-          ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
-        ],
-      ),
+       new Divider(height: 5.0, color: Colors.black),
       new Container(height: 100.0, child: gridView),
+      new Padding(padding: new EdgeInsets.all(10.0)),
       new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
@@ -259,7 +338,6 @@ class NewProjectPageState extends State<NewProjectPage> {
             child: new Text(msg),
           )));
     }
-
     return new Container(
       color: Colors.amber[200],
       child: new Center(
@@ -321,36 +399,69 @@ class NewProjectPageState extends State<NewProjectPage> {
         Navigator.of(context).pop();
         setState(() {
           _imageFile = ImagePicker.pickImage(source: source);
-          msg='';
         });
       },
     );
   }
 
   saveProject(ctx) async {
-    // String name = userController.text;
-    //     String desc = userController.text;
+    _name = _namecontroller.text;
+    _phoneNum = _phonecontroller.text;
 
-    if (_projectName == null || _projectName.length == 0 || _projectName.trim().length == 0) {
+    if (_name == null || _name.length == 0 || _name.trim().length == 0) {
       Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("请输入项目名称！"),
+        content: new Text("请输入姓名！"),
       ));
       return;
     }
+
+    if (_phoneNum == null ||
+        _phoneNum.length == 0 ||
+        _phoneNum.trim().length == 0) {
+      Scaffold.of(ctx).showSnackBar(new SnackBar(
+        content: new Text("手机号代表你的唯一编码！"),
+      ));
+      return;
+    }
+
+    if (_title == null) {
+      Scaffold.of(ctx).showSnackBar(new SnackBar(
+        content: new Text("请选择职务！"),
+      ));
+      return;
+    }
+
+    if (_sex == null) {
+      Scaffold.of(ctx).showSnackBar(new SnackBar(
+        content: new Text("请选择性别！"),
+      ));
+      return;
+    }
+
+    if (_birth == '请选择日期') {
+      Scaffold.of(ctx).showSnackBar(new SnackBar(
+        content: new Text("请选择日期！"),
+      ));
+      return;
+    }
+
     if (fileList.length == 0) {
       Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("请选择项目图片！"),
+        content: new Text("请选择头像！"),
       ));
       return;
     }
-    // 下面是调用接口发布动弹的逻辑
+    // 下面是调用接口
     try {
       Map<String, String> params = new Map();
-      params['name'] = _projectName;
-      params['desc'] = _projectDesc;
+      params['phone'] = _phoneNum;
+      params['name'] = _name;
+      params['sex'] = _sex == 1 ? '男' : '女';
+      params['title'] = _title == 1 ? '1' : '2';
+      params['birth'] = _birth;
       // 构造一个MultipartRequest对象用于上传图片
       var request = new MultipartRequest(
-          'POST', Uri.parse(Constant.baseUrl + "api/v1/project"));
+          'POST', Uri.parse(Constant.baseUrl + "api/v1/stuff"));
       request.fields.addAll(params);
       if (fileList != null && fileList.length > 0) {
         // 这里虽然是添加了多个图片文件，但是开源中国提供的接口只接收一张图片
@@ -370,7 +481,7 @@ class NewProjectPageState extends State<NewProjectPage> {
       setState(() {
         isLoading = true;
       });
-     // 发送请求
+      // 发送请求
       var response = await request.send();
       if (response.statusCode == 200) {
         setState(() {
@@ -390,7 +501,7 @@ class NewProjectPageState extends State<NewProjectPage> {
                 // 成功
                 setState(() {
                   isLoading = false;
-                  msg = "项目名称重复";
+                  msg = "电话号码重复";
                 });
               } else {
                 setState(() {

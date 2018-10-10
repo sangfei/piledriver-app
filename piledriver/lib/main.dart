@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'dart:async';
+import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
-import 'package:piledriver/MainPage.dart';
-import 'pages/LoginPage.dart';
-import 'pages/stufflist.dart';
-import 'pages/addStuff.dart';
+import 'package:piledriver/pages/ProjectPage.dart';
+import 'package:piledriver/pages/LoginPage.dart';
+import 'package:piledriver/Utils/cache_util.dart';
+import 'package:piledriver/bean/stuffBean.dart';
 
 void main() {
   _getLandingFile().then((onValue) {
@@ -16,10 +17,31 @@ void main() {
 Future<File> _getLandingFile() async {
   try {
     String dir = (await getApplicationDocumentsDirectory()).path;
+    File file = new File('$dir/LandingInformation');
+    _readLoginData(file).then((onValue) {
+      CacheUtil.getInstance().setUser(onValue);
+    });
     return new File('$dir/LandingInformation');
   } on FileSystemException {
     print('============exception');
     return null;
+  }
+}
+
+Future<StuffBean> _readLoginData(File file) async {
+  try {
+    /*
+       * 获取本地文件目录
+       * 关键字await表示等待操作完成
+       */
+    String data = await file.readAsString();
+    Map json = new JsonDecoder().convert(data);
+    StuffBean stuff = StuffBean.map(json);
+    return stuff;
+  } on FileSystemException {
+    // 发生异常时返回默认值
+    print("read exception");
+    return new StuffBean(0, 0, '', '', '', '', '');
   }
 }
 
@@ -47,12 +69,9 @@ class MyApp extends StatelessWidget {
                 //设置文本样式
                 // display1: new TextStyle(color: Colors.deepPurple, fontSize:12.0),
                 title: new TextStyle(color: Colors.black, fontSize: 16.0))),
-        home: landing ? new MainPage() : new LoginPage(),
+        home: landing ? new ProjectPage() : new LoginPage(),
         routes: <String, WidgetBuilder>{
           '/login': (BuildContext context) => LoginPage(),
-
-          '/stuff': (BuildContext context) => StuffList(),
-          '/addStuff': (BuildContext context) => AddStuff(),
         });
   }
 }

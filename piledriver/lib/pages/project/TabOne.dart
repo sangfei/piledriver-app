@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:piledriver/bean/projectBean.dart';
-import 'package:piledriver/pages/projectDetail.dart';
+import 'package:piledriver/pages/WorkRegion.dart';
 import 'package:piledriver/common/constant.dart';
 
 class TabOne extends StatefulWidget {
@@ -21,7 +21,11 @@ class TabOneState extends State<TabOne> {
     super.initState();
     getApiData();
   }
-
+@override
+void dispose() {
+  super.dispose();
+      datas;
+}
   @override
   Widget build(BuildContext context) {
     var content;
@@ -30,7 +34,7 @@ class TabOneState extends State<TabOne> {
         child: new CircularProgressIndicator(),
       );
     } else {
-      content = new ListView(children: buildMovieItems());
+      content = new ListView(children: buildProjectItems());
     }
     return new Scaffold(
       body: content,
@@ -40,7 +44,6 @@ class TabOneState extends State<TabOne> {
   Future getApiData() async {
     //当前的项目列表
     var url = Constant.baseUrl + "/api/v1/project";
-
     var httpClient = new HttpClient();
     var request = await httpClient.getUrl(Uri.parse(url));
     var response = await request.close();
@@ -50,20 +53,17 @@ class TabOneState extends State<TabOne> {
         datas = ProjectBean.decodeData(jsonData);
       });
     }
-    var castsAcatars = datas[0].projectName;
-    print("castsAcatars");
-    print("第一个条目的数据：" + castsAcatars);
   }
 
   // 每个条目的信息
-  buildMovieItems() {
+  buildProjectItems() {
     List<Widget> widgets = [];
     for (int i = 0; i < datas.length; i++) {
       ProjectBean data = datas[i];
       var gd = new GestureDetector(
         onTap: () {
           Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-            return new ProjectDetail(data);
+            return new WorkRegionPage(data);
           }));
         },
         child: new Column(
@@ -86,8 +86,9 @@ class TabOneState extends State<TabOne> {
   }
 
   buildImage(ProjectBean data) {
+    var imgname = "P${data.projectID}";
     var src =
-        "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2535191502.jpg";
+        Constant.baseUrl+ "image/load/$imgname.jpg";
     return new Padding(
       padding: const EdgeInsets.only(
         top: 10.0,
@@ -117,12 +118,6 @@ class TabOneState extends State<TabOne> {
         ),
         new Text("项目详情：" + data.projectDetail),
         new Text(data.projectID.toString()),
-        // new Text(data.total),
-        // new Text(data.ratingAverage),
-        // new Text(
-        //   data.collect_count,
-        //   style: new TextStyle(fontSize: 13.0, color: Colors.green),
-        // ),
       ],
     );
   }

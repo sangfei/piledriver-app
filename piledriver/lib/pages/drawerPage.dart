@@ -1,6 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:piledriver/pages/mine.dart';
+import 'package:piledriver/pages/ProjectPage.dart';
+import 'package:piledriver/pages/StuffPage.dart';
+import 'package:piledriver/pages/SettingPage.dart';
+import 'package:piledriver/Utils/cache_util.dart';
+import 'package:piledriver/common/constant.dart';
 
 class DrawerPage extends StatefulWidget {
   @override
@@ -8,75 +12,109 @@ class DrawerPage extends StatefulWidget {
 }
 
 class DrawerPageState extends State<DrawerPage> {
-  static Widget homeDrawer(context) {
+  Widget homeDrawer(context) {
     return new ListView(padding: const EdgeInsets.only(), children: <Widget>[
       _drawerHeader(context),
-      new ClipRect(
-        child: new ListTile(
-          leading: new CircleAvatar(child: new Text("A")),
-          title: new Text('Drawer item A'),
-          onTap: () => {},
-        ),
+      new ListTile(
+        leading: new Icon(Icons.landscape),
+        title: new Text('项目管理'),
+        // subtitle: new Text("项目进度、施工纪录"),
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return new ProjectPage();
+            },
+          ), (route) => route == null);
+        },
       ),
       new ListTile(
-        leading: new CircleAvatar(child: new Text("B")),
-        title: new Text('Drawer item B'),
-        subtitle: new Text("Drawer item B subtitle"),
-        onTap: () => {},
+        leading: new Icon(Icons.people),
+        title: new Text('员工管理'),
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return new StuffPage();
+            },
+          ), (route) => route == null);
+        },
       ),
-      new AboutListTile(
-        icon: new CircleAvatar(child: new Text("Ab")),
-        child: new Text("About"),
-        applicationName: "Test",
-        applicationVersion: "1.0",
-        applicationIcon: new Image.asset(
-          "static/images/logo.png",
-          width: 64.0,
-          height: 64.0,
-        ),
-        applicationLegalese: "applicationLegalese",
-        aboutBoxChildren: <Widget>[
-          new Text("BoxChildren"),
-          new Text("box child 2")
-        ],
+      new ListTile(
+        leading: new Icon(Icons.settings),
+        title: new Text('设置'),
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return new SettingPage();
+            },
+          ), (route) => route == null);
+        },
       ),
     ]);
   }
 
   static Widget _drawerHeader(context) {
-    return new UserAccountsDrawerHeader(
-//      margin: EdgeInsets.zero,
-      accountName: new Text(
-        "sangfei",
-      ),
-      accountEmail: new Text(
-        "feisang@126.com",
-      ),
-      currentAccountPicture: new GestureDetector(
-          //用户头像
-          onTap: () {
-            Navigator.push(context,
-                new MaterialPageRoute(builder: (context) => new MinePage()));
-              
-          },
-          child: new CircleAvatar(
-            backgroundImage: new NetworkImage(
-                'http://n.sinaimg.cn/translate/20170726/Zjd3-fyiiahz2863063.jpg'),
-          )),
-      onDetailsPressed: () {},
-      // otherAccountsPictures: <Widget>[
-      //   new CircleAvatar(
-      //     backgroundImage: new NetworkImage(
-      //       'http://n.sinaimg.cn/translate/20170726/Zjd3-fyiiahz2863063.jpg'),
-      //   ),
-      // ],
+    var imgname = "S${CacheUtil.getInstance().getUser().stuffID}";
+
+    var src = Constant.baseUrl + "image/load/$imgname.jpg";
+    return new DrawerHeader(
+      padding: EdgeInsets.zero,
+      /* padding置为0 */
+      child: new Stack(children: <Widget>[
+        /* 用stack来放背景图片 */
+        new Image.asset(
+          'static/images/appbar_def_bg.jpeg',
+          fit: BoxFit.fill,
+          width: double.infinity,
+        ),
+        new Align(
+          /* 先放置对齐 */
+          alignment: FractionalOffset.bottomLeft,
+          child: Container(
+            height: 70.0,
+            margin: EdgeInsets.only(left: 12.0, bottom: 12.0),
+            child: new Row(
+              mainAxisSize: MainAxisSize.min,
+              /* 宽度只用包住子组件即可 */
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: <Widget>[
+                new CircleAvatar(
+                  backgroundImage: new NetworkImage(src),
+                  radius: 35.0,
+                ),
+                new Container(
+                  margin: EdgeInsets.only(left: 16.0),
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start, // 水平方向左对齐
+                    mainAxisAlignment: MainAxisAlignment.center, // 竖直方向居中
+                    children: <Widget>[
+                      new Text(
+                        "${CacheUtil.getInstance().getUser().name}",
+                        style: new TextStyle(
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white),
+                      ),
+                      new Text(
+                        "手机号码：${CacheUtil.getInstance().getUser().phone}",
+                        style:
+                            new TextStyle(fontSize: 14.0, color: Colors.white),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ]),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.white70,
       body: homeDrawer(context),
     );
   }

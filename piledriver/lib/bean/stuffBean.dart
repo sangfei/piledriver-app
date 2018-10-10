@@ -11,7 +11,7 @@ class StuffBean {
   final String phone; //名称
   final String birth; //名称
   final String pwd; //名称
-
+ 
   StuffBean(this.stuffID, this.title, this.name, this.sex, this.phone, this.birth, this.pwd);
   static List<StuffBean> datas = new List<StuffBean>();
 
@@ -29,4 +29,15 @@ class StuffBean {
     return new StuffBean(subject['id'], subject['title'], subject['name'].toString(),
         subject['sex'].toString(),subject['phone'].toString(),subject['birth'].toString(),subject['pwd'].toString());
   }
+
+  Map<String, dynamic> toJson() =>
+    {
+      'id': stuffID,
+      'title': title,
+      'name': name,
+      'sex': sex,
+      'phone': phone,
+      'birth': birth,
+      'pwd': pwd,
+    };
 }

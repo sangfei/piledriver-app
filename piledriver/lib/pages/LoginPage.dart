@@ -5,14 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'package:piledriver/MainPage.dart';
-import 'package:flutter/material.dart';
-import 'package:piledriver/common/config/Config.dart';
-import 'package:piledriver/common/local/LocalStorage.dart';
+import 'package:piledriver/pages/ProjectPage.dart';
 import 'package:piledriver/common/style/GSYStyle.dart';
 import 'package:piledriver/widget/GSYFlexButton.dart';
 import 'package:piledriver/widget/GSYInputWidget.dart';
 import 'package:piledriver/common/constant.dart';
+import 'package:piledriver/Utils/cache_util.dart';
+import 'package:piledriver/bean/stuffBean.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -28,20 +27,25 @@ class _LoginPageState extends State<LoginPage> {
   String _verifyCode = '';
   final TextEditingController userController = new TextEditingController();
   final TextEditingController pwController = new TextEditingController();
-  @override
-  void initState() {
-    _readLoginData().then((Map onValue) {
-      setState(() {
-        _phoneNum = onValue["name"];
-        _verifyCode = onValue["password"];
-      });
-    });
-    super.initState();
-  }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Future<StuffBean> getApiData() async {
+    //当前的项目列表
+    StuffBean ret = new StuffBean(0, 0, '', '', '', '', '');
+    var url = Constant.baseUrl + '/api/v1/stuff?phone=$_phoneNum';
+    var httpClient = new HttpClient();
+    var request = await httpClient.getUrl(Uri.parse(url));
+    var response = await request.close();
+    if (response.statusCode == HttpStatus.OK) {
+      var jsonData = await response.transform(utf8.decoder).join();
+      print(jsonData);
+      var data = json.decode(jsonData);
+      ret = StuffBean.map(data);
+    } else {
+      print('======================resp error');
+
+      print("get user profile error");
+    }
+    return ret;
   }
 
   getUserProfile() async {
@@ -59,38 +63,15 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  Future<Map> _readLoginData() async {
-    try {
-      /*
-       * 获取本地文件目录
-       * 关键字await表示等待操作完成
-       */
-      String dir = (await getApplicationDocumentsDirectory()).path;
-      File file = new File('$dir/LandingInformation');
-      String data = await file.readAsString();
-
-      Map json = new JsonDecoder().convert(data);
-      return json;
-    } on FileSystemException {
-      // 发生异常时返回默认值
-      print("read exception");
-      Map json = new JsonDecoder().convert('{"name":"","password":""}');
-      return json;
-    }
-  }
-
   _userLogIn(String name, String password) {
-    getUserProfile().then((value) {
-      var userpwd = value;
-
-      print('==============getpasswd===========$userpwd');
-      if (userpwd == password) {
-        print("$name $password");
-        _saveLogin(name, password);
+    getApiData().then((value) {
+      var userpwd = value.pwd;
+       if (userpwd == password) {
+         _saveLogin(value);
         // 清除导航纪录
         Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
           builder: (BuildContext context) {
-            return new MainPage();
+            return new ProjectPage();
           },
         ), (route) => route == null);
       } else {
@@ -99,15 +80,18 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  Future<Null> _saveLogin(String name, String password) async {
+  Future<Null> _saveLogin(StuffBean stuff) async {
     try {
       /*
        * 获取本地文件目录
        * 关键字await表示等待操作完成
        */
+      String stuffJson = json.encode(stuff).toString();
       String dir = (await getApplicationDocumentsDirectory()).path;
-      await new File('$dir/LandingInformation')
-          .writeAsString('{"name":"$name","password":"$password"}');
+      await new File('$dir/LandingInformation').writeAsString(stuffJson);
+      print("stuffJson");
+      print(stuffJson);
+      CacheUtil.getInstance().setUser(stuff);
       print("save success");
     } on FileSystemException {
       // 发生异常时返回默认值
@@ -186,37 +170,6 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildLabel() {
-    return new Container(
-      margin: const EdgeInsets.only(top: 40.0, bottom: 20.0),
-      alignment: Alignment.center,
-      child: new Text(
-        "登录桩机管理系统",
-        style: new TextStyle(fontSize: 24.0),
-      ),
-    );
-  }
-
-  Widget _buildRegist() {
-    return new Padding(
-      padding: const EdgeInsets.only(left: 40.0, right: 40.0, top: 20.0),
-      child: new RaisedButton(
-        color: Colors.blue,
-        textColor: Colors.white,
-        disabledColor: Colors.blue[100],
-        onPressed: (_phoneNum.isEmpty || _verifyCode.isEmpty)
-            ? null
-            : () {
-                _userLogIn(_phoneNum, _verifyCode);
-              },
-        child: new Text(
-          "登  录",
-          style: new TextStyle(fontSize: 16.0),
-        ),
-      ),
-    );
-  }
-
   Widget _buildBody() {
     return new Container(
         color: Colors.amber[200],
@@ -230,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: new Padding(
                     padding: new EdgeInsets.only(
                         left: 30.0, top: 40.0, right: 30.0, bottom: 80.0),
-                    // child: 
+                    // child:
                     // new ListView(
                     //   children: <Widget>[
                     //     _buildLabel(),
@@ -243,57 +196,60 @@ class _LoginPageState extends State<LoginPage> {
                     //   ],
                     // )
                     child: new Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    new Image(image: new AssetImage(GSYICons.DEFAULT_USER_ICON), width: 90.0, height: 90.0),
-                    new Padding(padding: new EdgeInsets.all(10.0)),
-                    new GSYInputWidget(
-                      hintText: "请输入手机号",
-                      iconData: GSYICons.LOGIN_USER,
-                      onChanged: (String value) {
-                        _phoneNum = value;
-                      },
-                      controller: userController,
-                    ),
-                    new Padding(padding: new EdgeInsets.all(10.0)),
-                    new GSYInputWidget(
-                      hintText: "请输入密码",
-                      iconData: GSYICons.LOGIN_PW,
-                      obscureText: true,
-                      onChanged: (String value) {
-                        _verifyCode = value;
-                      },
-                      controller: pwController,
-                    ),
-                    new Padding(padding: new EdgeInsets.all(30.0)),
-                    new GSYFlexButton(
-                      text: "登录",
-                      color: Theme.of(context).primaryColor,
-                      textColor: Color(GSYColors.textWhite),
-                      onPress: () {
-                        if (_phoneNum == null || _phoneNum.length == 0) {
-                          return;
-                        }
-                        if (_verifyCode == null || _verifyCode.length == 0) {
-                          return;
-                        }
-                         _userLogIn(_phoneNum, _verifyCode);
-                        // CommonUtils.showLoadingDialog(context);
-                        // UserDao.login(_userName.trim(), _password.trim(), store).then((res) {
-                        //   Navigator.pop(context);
-                        //   if (res != null && res.result) {
-                        //     new Future.delayed(const Duration(seconds: 1), () {
-                        //       NavigatorUtils.goHome(context);
-                        //       return true;
-                        //     });
-                        //   }
-                        // });
-                      },
-                    )
-                  ],
-                )
-                    ))));
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        new Image(
+                            image: new AssetImage(GSYICons.DEFAULT_USER_ICON),
+                            width: 90.0,
+                            height: 90.0),
+                        new Padding(padding: new EdgeInsets.all(10.0)),
+                        new GSYInputWidget(
+                          hintText: "请输入手机号",
+                          iconData: GSYICons.LOGIN_USER,
+                          onChanged: (String value) {
+                            _phoneNum = value;
+                          },
+                          controller: userController,
+                        ),
+                        new Padding(padding: new EdgeInsets.all(10.0)),
+                        new GSYInputWidget(
+                          hintText: "请输入密码",
+                          iconData: GSYICons.LOGIN_PW,
+                          obscureText: true,
+                          onChanged: (String value) {
+                            _verifyCode = value;
+                          },
+                          controller: pwController,
+                        ),
+                        new Padding(padding: new EdgeInsets.all(30.0)),
+                        new GSYFlexButton(
+                          text: "登录",
+                          color: Theme.of(context).primaryColor,
+                          textColor: Color(GSYColors.textWhite),
+                          onPress: () {
+                            if (_phoneNum == null || _phoneNum.length == 0) {
+                              return;
+                            }
+                            if (_verifyCode == null ||
+                                _verifyCode.length == 0) {
+                              return;
+                            }
+                            _userLogIn(_phoneNum, _verifyCode);
+                            // CommonUtils.showLoadingDialog(context);
+                            // UserDao.login(_userName.trim(), _password.trim(), store).then((res) {
+                            //   Navigator.pop(context);
+                            //   if (res != null && res.result) {
+                            //     new Future.delayed(const Duration(seconds: 1), () {
+                            //       NavigatorUtils.goHome(context);
+                            //       return true;
+                            //     });
+                            //   }
+                            // });
+                          },
+                        )
+                      ],
+                    )))));
   }
 
   showTips() {

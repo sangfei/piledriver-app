@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:piledriver/TabIconView.dart';
-import 'package:piledriver/pages/HomePage.dart';
-import 'package:piledriver/pages/mine.dart';
+import 'package:piledriver/pages/ProjectPage.dart';
 
 /*
  * 从字面理解，StatelessWidget 是没有内部状态的即不可变。而 StatefulWidget 具有状态，即是可刷新的。
@@ -53,8 +52,7 @@ class MainPageState extends State<MainPage> with TickerProviderStateMixin {
     }
     // 两个页面
     pageArray = <StatefulWidget>[
-      new HomePage(),
-      new MinePage()
+      new ProjectPage(),
     ];
     currentPage = pageArray[cuttentIndex];
   }
