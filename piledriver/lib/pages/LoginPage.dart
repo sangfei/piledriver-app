@@ -12,6 +12,7 @@ import 'package:piledriver/widget/GSYInputWidget.dart';
 import 'package:piledriver/common/constant.dart';
 import 'package:piledriver/Utils/cache_util.dart';
 import 'package:piledriver/bean/stuffBean.dart';
+import 'package:piledriver/Utils/MyContainUtils.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -66,8 +67,8 @@ class _LoginPageState extends State<LoginPage> {
   _userLogIn(String name, String password) {
     getApiData().then((value) {
       var userpwd = value.pwd;
-       if (userpwd == password) {
-         _saveLogin(value);
+      if (userpwd == password) {
+        _saveLogin(value);
         // 清除导航纪录
         Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
           builder: (BuildContext context) {
@@ -263,18 +264,155 @@ class _LoginPageState extends State<LoginPage> {
                       textAlign: TextAlign.center,
                       style: new TextStyle(
                           color: Theme.of(context).accentColor,
-                          fontSize: 24.0))));
+                          fontSize: 16.0))));
         });
+  }
+
+  final scaffoldState = GlobalKey<ScaffoldState>();
+
+  buildCoolLogin() {
+    final widthfull = MediaQuery.of(context).size.width;
+    return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      key: scaffoldState,
+      backgroundColor: Colors.white,
+      body: new GestureDetector(
+        onTap: () {
+          FocusScope.of(context).requestFocus(new FocusNode());
+        },
+        child: new Container(
+          child: Stack(
+            fit: StackFit.expand,
+            //alignment: Alignment(0.1, 0.3),
+            children: <Widget>[
+              new Container(
+                alignment: Alignment.topCenter,
+                child: MyContainUtils(""),
+              ),
+              Card(
+                color: Colors.white70,
+                margin: EdgeInsets.only(
+                    top: 190.0, right: 50.0, left: 50.0, bottom: 100.0),
+                elevation: 11.0,
+                child: Container(
+                  alignment: Alignment.center,
+                  width: widthfull - 120,
+                  child: new Container(
+                    margin: new EdgeInsets.all(16.0),
+                    child: ListView(
+                      children: <Widget>[
+                        new Text('欧森奥建筑工程有限公司',
+                      textAlign: TextAlign.center,
+                      style: new TextStyle(
+                          color: Colors.black,
+                          fontSize: 22.0)),
+                        new SizedBox(
+                          height: 30.0,
+                        ),
+                        new TextField(
+                          onChanged: (phone) => _phoneNum = phone,
+                          // enabled: !snapshot.data,
+                          style: new TextStyle(
+                              fontSize: 15.0, color: Colors.black),
+                          decoration: new InputDecoration(
+                              hintText: '请输入手机号',
+                              labelText: "手机号",
+                              labelStyle: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 13.0),
+                              hintStyle: TextStyle(fontSize: 12.0)),
+                        ),
+                        new SizedBox(
+                          height: 10.0,
+                        ),
+                        new TextField(
+                          onChanged: (world) => _verifyCode = world,
+                          obscureText: true,
+                          // enabled: !snapshot.data,
+                          style: new TextStyle(
+                              fontSize: 15.0, color: Colors.black),
+                          decoration: new InputDecoration(
+                              hintText: '请输入密码',
+                              labelText: "密码",
+                              labelStyle: TextStyle(
+                                  fontWeight: FontWeight.w700, fontSize: 13.0),
+                              hintStyle: TextStyle(fontSize: 12.0)),
+                        ),
+                        new SizedBox(
+                          height: 50.0,
+                        ),
+                        Material(
+                          //带给我们Material的美丽风格美滋滋。你也多看看这个布局
+                          elevation: 10.0,
+                          color: Colors.transparent,
+                          shape: const StadiumBorder(),
+                          child: InkWell(
+                            onTap: () {
+                              //登陆
+                              if (_phoneNum == null || _phoneNum.length == 0) {
+                                return;
+                              }
+                              if (_verifyCode == null ||
+                                  _verifyCode.length == 0) {
+                                return;
+                              }
+                              _userLogIn(_phoneNum, _verifyCode);
+                              // _Login(this._userPhone, this._passWold, context);
+                            },
+                            //来个飞溅美滋滋。
+                            splashColor: Colors.purpleAccent,
+                            child: Ink(
+                              height: 40.0,
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                colors: <Color>[
+                                  Color(0xFF4DD0E1),
+                                  Color(0xFF00838F)
+                                ],
+                              )),
+                              child: Center(
+                                child: Text(
+                                  '登录',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 20.0),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 20.0,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              )
+            ],
+          ),
+          decoration: new BoxDecoration(
+            gradient: new LinearGradient(
+              begin: const FractionalOffset(0.5, 0.0),
+              end: const FractionalOffset(0.5, 1.0),
+              colors: <Color>[Colors.white, Color(0xFFD7CCC8)],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Material(
-      child: new Scaffold(
-        key: registKey,
-        backgroundColor: Colors.blueGrey,
-        body: _buildBody(),
-      ),
-    );
+    // return new Material(
+    //   child: new Scaffold(
+    //     key: registKey,
+    //     backgroundColor: Colors.blueGrey,
+    //     body: _buildBody(),
+    //   ),
+    // );
+    return buildCoolLogin();
   }
 }

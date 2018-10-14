@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:piledriver/bean/projectBean.dart';
-import 'package:piledriver/pages/projectDetail.dart';
+import 'package:piledriver/bean/Equipment.dart';
+import 'package:piledriver/pages/WorkRegion.dart';
 import 'package:piledriver/common/constant.dart';
 
 class TabOne extends StatefulWidget {
@@ -14,8 +14,8 @@ class TabOne extends StatefulWidget {
 }
 
 class TabOneState extends State<TabOne> {
-  List<ProjectBean> datas = [];
-
+  List<Equipment> datas = [];
+  bool loading = true;
   @override
   void initState() {
     super.initState();
@@ -23,15 +23,27 @@ class TabOneState extends State<TabOne> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     var content;
     if (datas.isEmpty) {
-      content = new Center(
-        child: new CircularProgressIndicator(),
-      );
+      if (loading) {
+        content = new Center(
+          child: new CircularProgressIndicator(),
+        );
+      } else {
+        content = new Center(
+          child: new Text('没有数据'),
+        );
+      }
     } else {
-      content = new ListView(children: buildMovieItems());
+      content = new ListView(children: buildProjectItems());
     }
+
     return new Scaffold(
       body: content,
     );
@@ -39,32 +51,29 @@ class TabOneState extends State<TabOne> {
 
   Future getApiData() async {
     //当前的项目列表
-    var url = Constant.baseUrl + "/api/v1/project";
-
+    var url = Constant.baseUrl + "/api/v1/list/equipment";
     var httpClient = new HttpClient();
     var request = await httpClient.getUrl(Uri.parse(url));
     var response = await request.close();
     if (response.statusCode == HttpStatus.OK) {
       var jsonData = await response.transform(utf8.decoder).join();
       setState(() {
-        datas = ProjectBean.decodeData(jsonData);
+        datas = Equipment.decodeData(jsonData);
+        loading = false;
       });
     }
-    var castsAcatars = datas[0].projectName;
-    print("castsAcatars");
-    print("第一个条目的数据：" + castsAcatars);
   }
 
   // 每个条目的信息
-  buildMovieItems() {
+  buildProjectItems() {
     List<Widget> widgets = [];
     for (int i = 0; i < datas.length; i++) {
-      ProjectBean data = datas[i];
+      Equipment data = datas[i];
       var gd = new GestureDetector(
         onTap: () {
-          Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-            return new ProjectDetail(data);
-          }));
+          // Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+          //   return new WorkRegionPage(data);
+          // }));
         },
         child: new Column(
           children: <Widget>[
@@ -72,7 +81,12 @@ class TabOneState extends State<TabOne> {
             new Row(
               children: <Widget>[
                 buildImage(data),
-                new Expanded(child: buildMsg(data)),
+                new Expanded(
+                    child: new Padding(
+                        padding: const EdgeInsets.only(
+                          right: 10.0,
+                        ),
+                        child: buildMsg(data))),
                 const Icon(Icons.arrow_forward)
               ],
             ),
@@ -85,25 +99,25 @@ class TabOneState extends State<TabOne> {
     return widgets;
   }
 
-  buildImage(ProjectBean data) {
-    var src =
-        "https://img3.doubanio.com/view/photo/s_ratio_poster/public/p2535191502.jpg";
+  buildImage(Equipment data) {
+    var imgname = "E${data.equipmentid}";
+    var src = Constant.baseUrl + "image/load/$imgname.jpg";
     return new Padding(
       padding: const EdgeInsets.only(
         top: 10.0,
         left: 10.0,
         right: 10.0,
-        bottom: 10.0,
+        bottom: 0.0,
       ),
       child: new Image.network(
         src,
-        width: 140.0,
-        height: 160.0,
+        width: 90.0,
+        height: 100.0,
       ),
     );
   }
 
-  buildMsg(ProjectBean data) {
+  buildMsg(Equipment data) {
     return new Column(
       //每个孩子的边缘对其
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,12 +125,15 @@ class TabOneState extends State<TabOne> {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         new Text(
-          data.projectName,
+          data.equipmentName,
           textAlign: TextAlign.left,
           style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
         ),
-        new Text("项目详情：" + data.projectDetail),
-        new Text(data.projectID.toString()),
+        new Text("设备品牌：" + data.equipmentBrand),
+        new Text("设备型号：" + data.equipmentModel),
+        new Text("设备管理员：" + data.ownerid.toString()),
+
+        // new Text(data.projectID.toString()),
       ],
     );
   }

@@ -23,6 +23,7 @@ class TabOne extends StatefulWidget {
 
 class TabOneState extends State<TabOne> {
   List<ConstructionBean> datas = [];
+  bool loading = true;
   List<Widget> widgetList = List();
   String now = DateFormat('yyyy-MM-dd').format(DateTime.now());
   @override
@@ -40,13 +41,21 @@ class TabOneState extends State<TabOne> {
   @override
   Widget build(BuildContext context) {
     var content;
+
     if (datas.isEmpty) {
-      content = new Center(
-        child: new CircularProgressIndicator(),
-      );
+      if (loading) {
+        content = new Center(
+          child: new CircularProgressIndicator(),
+        );
+      } else {
+        content = new Center(
+          child: new Text('没有数据'),
+        );
+      }
     } else {
       content = buildContent();
     }
+
     return new Scaffold(
       backgroundColor: Colors.white,
       body: content,
@@ -177,6 +186,7 @@ class TabOneState extends State<TabOne> {
       var jsonData = await response.transform(utf8.decoder).join();
       setState(() {
         datas = ConstructionBean.decodeData(jsonData);
+        loading = false;
       });
     }
   }

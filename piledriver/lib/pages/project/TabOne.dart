@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:piledriver/bean/projectBean.dart';
+import 'package:piledriver/bean/ProjectBean.dart';
 import 'package:piledriver/pages/WorkRegion.dart';
 import 'package:piledriver/common/constant.dart';
 
@@ -15,27 +15,35 @@ class TabOne extends StatefulWidget {
 
 class TabOneState extends State<TabOne> {
   List<ProjectBean> datas = [];
-
+  bool loading = true;
   @override
   void initState() {
     super.initState();
     getApiData();
   }
-@override
-void dispose() {
-  super.dispose();
-      datas;
-}
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     var content;
     if (datas.isEmpty) {
-      content = new Center(
-        child: new CircularProgressIndicator(),
-      );
+      if (loading) {
+        content = new Center(
+          child: new CircularProgressIndicator(),
+        );
+      } else {
+        content = new Center(
+          child: new Text('没有数据'),
+        );
+      }
     } else {
       content = new ListView(children: buildProjectItems());
     }
+
     return new Scaffold(
       body: content,
     );
@@ -51,6 +59,7 @@ void dispose() {
       var jsonData = await response.transform(utf8.decoder).join();
       setState(() {
         datas = ProjectBean.decodeData(jsonData);
+        loading = false;
       });
     }
   }
@@ -72,7 +81,12 @@ void dispose() {
             new Row(
               children: <Widget>[
                 buildImage(data),
-                new Expanded(child: buildMsg(data)),
+                new Expanded(
+                    child: new Padding(
+                        padding: const EdgeInsets.only(
+                          right: 10.0,
+                        ),
+                        child: buildMsg(data))),
                 const Icon(Icons.arrow_forward)
               ],
             ),
@@ -87,19 +101,18 @@ void dispose() {
 
   buildImage(ProjectBean data) {
     var imgname = "P${data.projectID}";
-    var src =
-        Constant.baseUrl+ "image/load/$imgname.jpg";
+    var src = Constant.baseUrl + "image/load/$imgname.jpg";
     return new Padding(
       padding: const EdgeInsets.only(
         top: 10.0,
         left: 10.0,
         right: 10.0,
-        bottom: 10.0,
+        bottom: 0.0,
       ),
       child: new Image.network(
         src,
-        width: 140.0,
-        height: 160.0,
+        width: 70.0,
+        height: 80.0,
       ),
     );
   }
@@ -117,7 +130,7 @@ void dispose() {
           style: new TextStyle(fontWeight: FontWeight.bold, fontSize: 14.0),
         ),
         new Text("项目详情：" + data.projectDetail),
-        new Text(data.projectID.toString()),
+        // new Text(data.projectID.toString()),
       ],
     );
   }

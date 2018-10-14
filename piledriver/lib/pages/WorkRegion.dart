@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:convert';
 import 'dart:async';
-import 'package:piledriver/bean/projectBean.dart';
+import 'package:piledriver/bean/ProjectBean.dart';
 import 'package:http/http.dart' as http;
 import 'package:piledriver/common/constant.dart';
 import 'package:piledriver/pages/workregion/TabOne.dart';
+import 'package:piledriver/pages/workregion/TabTwo.dart';
+import 'package:piledriver/pages/ProjectPage.dart';
+
 
 class WorkRegionPage extends StatefulWidget {
   final ProjectBean projectInfo;
@@ -37,12 +40,17 @@ class WorkRegionPageState extends State<WorkRegionPage>
           // ),
           leading: new IconButton(
             icon: new Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: (){Navigator.pushAndRemoveUntil(context,
+                    new MaterialPageRoute<Null>(
+                  builder: (BuildContext context) {
+                    return new ProjectPage();
+                  },
+                ), (route) => route == null);},
           ),
-          backgroundColor: Colors.amber[200],
+            backgroundColor: Colors.lightBlueAccent,
           title: new Container(
               child: Text(
-            project.projectName,
+            project.projectName+"  项目详情",
           )),
           bottom: TabBar(
             labelColor: Colors.black,
@@ -56,7 +64,7 @@ class WorkRegionPageState extends State<WorkRegionPage>
         body: new TabBarView(
           children: <Widget>[
             new Center(child: TabOne(project)),
-            new Center(child: new Text('船')),
+            new Center(child: TabTwo(project)),
           ],
         ),
       ),

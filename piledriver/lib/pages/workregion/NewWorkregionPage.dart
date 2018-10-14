@@ -6,27 +6,29 @@ import 'dart:io';
 import 'package:piledriver/common/style/GSYStyle.dart';
 import 'package:piledriver/widget/GSYFlexButton.dart';
 import 'package:http/http.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:async/async.dart';
 import 'package:piledriver/common/constant.dart';
 import 'package:piledriver/pages/ProjectPage.dart';
+import 'package:piledriver/bean/ProjectBean.dart';
+import 'package:piledriver/pages/WorkRegion.dart';
 
-class NewProjectPage extends StatefulWidget {
+class NewWorkregionPage extends StatefulWidget {
+  final ProjectBean project;
+
+  NewWorkregionPage(this.project);
   @override
   State<StatefulWidget> createState() {
-    return new NewProjectPageState();
+    return new NewWorkregionPageState();
   }
 }
 
-class NewProjectPageState extends State<NewProjectPage> {
+class NewWorkregionPageState extends State<NewWorkregionPage> {
   GlobalKey<ScaffoldState> registKey = new GlobalKey();
-  List<File> fileList = new List();
-  Future<File> _imageFile;
+
   bool isLoading = false;
   String msg = "";
-  String _projectName = '';
-  String _partya = '';
-  String _projectDesc = '';
+  String _workregionName = '';
+  String _workeregionDesc = '';
   // final TextEditingController userController = new TextEditingController();
   // final TextEditingController pwController = new TextEditingController();
   @override
@@ -39,44 +41,17 @@ class NewProjectPageState extends State<NewProjectPage> {
     super.dispose();
   }
 
-  Widget projectPartyaFiled() {
-    var node = new FocusNode();
-    return new TextField(
-      style: new TextStyle(color: Colors.black, fontSize: 16.00),
-      onChanged: (str) {
-        _partya = str;
-        setState(() {});
-      },
-      decoration: new InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-        hintText: "请输入甲方名称，不超过24个字",
-        hintStyle:
-            new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
-        // border: new OutlineInputBorder(
-        //   gapPadding: 10.0,
-        //     borderRadius:
-        //         const BorderRadius.all(const Radius.circular(5.0)))
-      ),
-      maxLines: 1,
-      maxLength: 24,
-      obscureText: false,
-      onSubmitted: (text) {
-        FocusScope.of(context).reparentIfNeeded(node);
-      },
-    );
-  }
-
   Widget projectNameFiled() {
     var node = new FocusNode();
     return new TextField(
       style: new TextStyle(color: Colors.black, fontSize: 16.00),
       onChanged: (str) {
-        _projectName = str;
+        _workregionName = str;
         setState(() {});
       },
       decoration: new InputDecoration(
         contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-        hintText: "请输入项目名称，不超过24个字",
+        hintText: "请输入地块名称",
         hintStyle:
             new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
         // border: new OutlineInputBorder(
@@ -98,12 +73,12 @@ class NewProjectPageState extends State<NewProjectPage> {
     return new TextField(
       style: new TextStyle(color: Colors.black, fontSize: 16.00),
       onChanged: (str) {
-        _projectDesc = str;
+        _workeregionDesc = str;
         setState(() {});
       },
       decoration: new InputDecoration(
           contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-          hintText: "请输入项目描述，不超过128个字",
+          hintText: "请输入地块描述，不超过128个字",
           hintStyle:
               new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
           border: new OutlineInputBorder(
@@ -137,23 +112,9 @@ class NewProjectPageState extends State<NewProjectPage> {
   Widget build(BuildContext context) {
     return new Material(
       child: new Scaffold(
-        key: registKey,
-        backgroundColor: Colors.lightBlueAccent,
-        body: new FutureBuilder(
-          future: _imageFile,
-          builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
-            if (snapshot.connectionState == ConnectionState.done &&
-                snapshot.data != null &&
-                _imageFile != null) {
-              // 选择了图片（拍照或图库选择），添加到List中
-              fileList.add(snapshot.data);
-              _imageFile = null;
-            }
-            // 返回的widget
-            return getBody(context);
-          },
-        ),
-      ),
+          key: registKey,
+          backgroundColor: Colors.lightBlueAccent,
+          body: getBody(context)),
     );
   }
 
@@ -161,53 +122,10 @@ class NewProjectPageState extends State<NewProjectPage> {
     // 输入框
 
     // gridView用来显示选择的图片
-    var gridView = new Builder(
-      builder: (ctx) {
-        return new GridView.count(
-          // 分4列显示
-          crossAxisCount: 5,
-          children: new List.generate(fileList.length + 1, (index) {
-            // 这个方法体用于生成GridView中的一个item
-            var content;
-            if (index == 0) {
-              // 添加图片按钮
-              var addCell = new Center(
-                  child: new Image.asset(
-                'static/images/add-image.png',
-                width: 40.0,
-                height: 40.0,
-              ));
-              content = new GestureDetector(
-                onTap: () {
-                  // 添加图片
-                  pickImage(ctx);
-                },
-                child: addCell,
-              );
-            } else {
-              // 被选中的图片
-              content = new Center(
-                  child: new Image.file(
-                fileList[index - 1],
-                width: 40.0,
-                height: 40.0,
-                fit: BoxFit.cover,
-              ));
-            }
-            return new Container(
-              margin: const EdgeInsets.all(2.0),
-              width: 40.0,
-              height: 40.0,
-              color: const Color(0xFFECECEC),
-              child: content,
-            );
-          }),
-        );
-      },
-    );
+
     var children = [
       new Text(
-        "创建新的项目",
+        "为${widget.project.projectName}创建新的地块",
         style: new TextStyle(fontSize: 24.0),
       ),
       new Row(
@@ -216,7 +134,7 @@ class NewProjectPageState extends State<NewProjectPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Text(
-            "项目名称：",
+            "地块名称：",
             style: new TextStyle(fontSize: 14.0),
           ),
           Padding(padding: new EdgeInsets.only(left: 20.0)),
@@ -229,20 +147,7 @@ class NewProjectPageState extends State<NewProjectPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Text(
-            "甲方名称：",
-            style: new TextStyle(fontSize: 14.0),
-          ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
-        ],
-      ),
-      new Container(child: projectPartyaFiled()),
-      new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Text(
-            "项目描述：",
+            "地块描述：",
             style: new TextStyle(fontSize: 14.0),
           ),
           Padding(padding: new EdgeInsets.only(left: 20.0)),
@@ -250,19 +155,6 @@ class NewProjectPageState extends State<NewProjectPage> {
       ),
       new Container(height: 100.0, child: projectDescFiled()),
       Padding(padding: new EdgeInsets.only(bottom: 20.0)),
-      new Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          new Text(
-            "添加项目图片(只能上传一张):",
-            style: new TextStyle(fontSize: 14.0),
-          ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
-        ],
-      ),
-      new Container(height: 100.0, child: gridView),
       new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
@@ -284,7 +176,7 @@ class NewProjectPageState extends State<NewProjectPage> {
                 Navigator.pushAndRemoveUntil(context,
                     new MaterialPageRoute<Null>(
                   builder: (BuildContext context) {
-                    return new ProjectPage();
+                    return new WorkRegionPage(widget.project);
                   },
                 ), (route) => route == null);
               },
@@ -326,96 +218,31 @@ class NewProjectPageState extends State<NewProjectPage> {
     );
   }
 
-  // 相机拍照或者从图库选择图片
-  pickImage(ctx) {
-    // 如果已添加了1张图片，则提示不允许添加更多
-    num size = fileList.length;
-    if (size >= 1) {
-      Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("最多只能添加1张图片！"),
-      ));
-      return;
-    }
-    showModalBottomSheet<void>(context: context, builder: _bottomSheetBuilder);
-  }
-
-  Widget _bottomSheetBuilder(BuildContext context) {
-    return new Container(
-        height: 182.0,
-        child: new Padding(
-          padding: const EdgeInsets.fromLTRB(0.0, 30.0, 0.0, 30.0),
-          child: new Column(
-            children: <Widget>[
-              _renderBottomMenuItem("相机拍照", ImageSource.camera),
-              new Divider(
-                height: 2.0,
-              ),
-              _renderBottomMenuItem("图库选择照片", ImageSource.gallery)
-            ],
-          ),
-        ));
-  }
-
-  _renderBottomMenuItem(title, ImageSource source) {
-    var item = new Container(
-      height: 60.0,
-      child: new Center(child: new Text(title)),
-    );
-    return new InkWell(
-      child: item,
-      onTap: () {
-        Navigator.of(context).pop();
-        setState(() {
-          _imageFile = ImagePicker.pickImage(source: source);
-          msg = '';
-        });
-      },
-    );
-  }
-
   saveProject(ctx) async {
     // String name = userController.text;
     //     String desc = userController.text;
 
-    if (_projectName == null ||
-        _projectName.length == 0 ||
-        _projectName.trim().length == 0) {
+    if (_workregionName == null ||
+        _workregionName.length == 0 ||
+        _workregionName.trim().length == 0) {
       Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("请输入项目名称！"),
+        content: new Text("请输入地块名称！"),
       ));
       return;
     }
-    if (fileList.length == 0) {
-      Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("请选择项目图片！"),
-      ));
-      return;
-    }
+
     // 下面是调用接口发布动弹的逻辑
     try {
       Map<String, String> params = new Map();
-      params['name'] = _projectName;
-      params['desc'] = _projectDesc;
-      params['partya'] = _partya;
+      params['name'] = _workregionName;
+      params['desc'] = _workeregionDesc;
+      params['projectid'] = widget.project.projectID.toString();
+
       // 构造一个MultipartRequest对象用于上传图片
       var request = new MultipartRequest(
-          'POST', Uri.parse(Constant.baseUrl + "api/v1/project"));
+          'POST', Uri.parse(Constant.baseUrl + "api/v1/workregion"));
       request.fields.addAll(params);
-      if (fileList != null && fileList.length > 0) {
-        // 这里虽然是添加了多个图片文件，但是开源中国提供的接口只接收一张图片
-        for (File f in fileList) {
-          // 文件流
-          var stream =
-              new http.ByteStream(DelegatingStream.typed(f.openRead()));
-          // 文件长度
-          var length = await f.length();
-          // 文件名
-          var filename = f.path.substring(f.path.lastIndexOf("/") + 1);
-          // 将文件加入到请求体中
-          request.files.add(new http.MultipartFile('img', stream, length,
-              filename: filename));
-        }
-      }
+
       setState(() {
         isLoading = true;
       });
@@ -425,7 +252,6 @@ class NewProjectPageState extends State<NewProjectPage> {
         setState(() {
           isLoading = false;
           msg = "发布成功";
-          fileList.clear();
         });
       } else {
         // 解析请求返回的数据
@@ -439,7 +265,7 @@ class NewProjectPageState extends State<NewProjectPage> {
                 // 成功
                 setState(() {
                   isLoading = false;
-                  msg = "项目名称重复";
+                  msg = "地块名称重复";
                 });
               } else {
                 setState(() {

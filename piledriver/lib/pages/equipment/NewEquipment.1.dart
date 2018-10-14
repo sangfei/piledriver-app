@@ -9,26 +9,33 @@ import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:async/async.dart';
 import 'package:piledriver/common/constant.dart';
-import 'package:piledriver/pages/ProjectPage.dart';
+import 'package:piledriver/pages/Equipment.dart';
 
-class NewProjectPage extends StatefulWidget {
+class NewEquipment1 extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return new NewProjectPageState();
+    return new NewEquipmentPageState();
   }
 }
 
-class NewProjectPageState extends State<NewProjectPage> {
+class NewEquipmentPageState extends State<NewEquipment1> {
   GlobalKey<ScaffoldState> registKey = new GlobalKey();
   List<File> fileList = new List();
   Future<File> _imageFile;
   bool isLoading = false;
   String msg = "";
-  String _projectName = '';
-  String _partya = '';
-  String _projectDesc = '';
-  // final TextEditingController userController = new TextEditingController();
-  // final TextEditingController pwController = new TextEditingController();
+  String equipmentName;
+  String equipmentBrand;
+  String equipmentModel;
+  String equipmentDiameter;
+  String ownerid;
+  var selectItemValue;
+  final TextEditingController nameController = new TextEditingController();
+  final TextEditingController brandController = new TextEditingController();
+  final TextEditingController modelController = new TextEditingController();
+  final TextEditingController diameterController = new TextEditingController();
+  final TextEditingController owneridController = new TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -39,83 +46,21 @@ class NewProjectPageState extends State<NewProjectPage> {
     super.dispose();
   }
 
-  Widget projectPartyaFiled() {
-    var node = new FocusNode();
-    return new TextField(
-      style: new TextStyle(color: Colors.black, fontSize: 16.00),
-      onChanged: (str) {
-        _partya = str;
-        setState(() {});
-      },
-      decoration: new InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-        hintText: "请输入甲方名称，不超过24个字",
-        hintStyle:
-            new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
-        // border: new OutlineInputBorder(
-        //   gapPadding: 10.0,
-        //     borderRadius:
-        //         const BorderRadius.all(const Radius.circular(5.0)))
-      ),
-      maxLines: 1,
-      maxLength: 24,
-      obscureText: false,
-      onSubmitted: (text) {
-        FocusScope.of(context).reparentIfNeeded(node);
-      },
-    );
-  }
-
-  Widget projectNameFiled() {
-    var node = new FocusNode();
-    return new TextField(
-      style: new TextStyle(color: Colors.black, fontSize: 16.00),
-      onChanged: (str) {
-        _projectName = str;
-        setState(() {});
-      },
-      decoration: new InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-        hintText: "请输入项目名称，不超过24个字",
-        hintStyle:
-            new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
-        // border: new OutlineInputBorder(
-        //   gapPadding: 10.0,
-        //     borderRadius:
-        //         const BorderRadius.all(const Radius.circular(5.0)))
-      ),
-      maxLines: 1,
-      maxLength: 24,
-      obscureText: false,
-      onSubmitted: (text) {
-        FocusScope.of(context).reparentIfNeeded(node);
-      },
-    );
-  }
-
-  Widget projectDescFiled() {
-    var node = new FocusNode();
-    return new TextField(
-      style: new TextStyle(color: Colors.black, fontSize: 16.00),
-      onChanged: (str) {
-        _projectDesc = str;
-        setState(() {});
-      },
-      decoration: new InputDecoration(
-          contentPadding: const EdgeInsets.symmetric(vertical: 4.0),
-          hintText: "请输入项目描述，不超过128个字",
-          hintStyle:
-              new TextStyle(color: const Color(0xFF808080), fontSize: 12.00),
-          border: new OutlineInputBorder(
-              borderRadius:
-                  const BorderRadius.all(const Radius.circular(5.0)))),
-      maxLines: 8,
-      maxLength: 128,
-      obscureText: false,
-      onSubmitted: (text) {
-        FocusScope.of(context).reparentIfNeeded(node);
-      },
-    );
+  List<DropdownMenuItem> generateItemList() {
+    List<DropdownMenuItem> items = new List();
+    DropdownMenuItem item1 =
+        new DropdownMenuItem(value: '张三', child: new Text('张三'));
+    DropdownMenuItem item2 =
+        new DropdownMenuItem(value: '李四', child: new Text('李四'));
+    DropdownMenuItem item3 =
+        new DropdownMenuItem(value: '王二', child: new Text('王二'));
+    DropdownMenuItem item4 =
+        new DropdownMenuItem(value: '麻子', child: new Text('麻子'));
+    items.add(item1);
+    items.add(item2);
+    items.add(item3);
+    items.add(item4);
+    return items;
   }
 
   showTips() {
@@ -159,6 +104,7 @@ class NewProjectPageState extends State<NewProjectPage> {
 
   Widget getBody(BuildContext context) {
     // 输入框
+    final widthfull = MediaQuery.of(context).size.width;
 
     // gridView用来显示选择的图片
     var gridView = new Builder(
@@ -172,11 +118,7 @@ class NewProjectPageState extends State<NewProjectPage> {
             if (index == 0) {
               // 添加图片按钮
               var addCell = new Center(
-                  child: new Image.asset(
-                'static/images/add-image.png',
-                width: 40.0,
-                height: 40.0,
-              ));
+                  child: new Icon(Icons.photo_camera, color: Colors.red));
               content = new GestureDetector(
                 onTap: () {
                   // 添加图片
@@ -207,48 +149,126 @@ class NewProjectPageState extends State<NewProjectPage> {
     );
     var children = [
       new Text(
-        "创建新的项目",
+        "创建新的设备",
         style: new TextStyle(fontSize: 24.0),
       ),
       new Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: <Widget>[
           new Text(
-            "项目名称：",
+            "设备名称：",
             style: new TextStyle(fontSize: 14.0),
           ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
+          SizedBox(
+            child: new Container(
+              child: TextField(
+                controller: brandController,
+              ),
+            ),
+            width: widthfull * 0.5,
+          )
+          // new Expanded(
+          //     child: new Container(
+          //   child: TextField(
+          //     controller: nameController,
+          //   ),
+          // ))
         ],
       ),
-      new Container(child: projectNameFiled()),
       new Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: <Widget>[
           new Text(
-            "甲方名称：",
+            "设备品牌：",
             style: new TextStyle(fontSize: 14.0),
           ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
+          SizedBox(
+            child: new Container(
+              child: TextField(
+                controller: brandController,
+              ),
+            ),
+            width: widthfull * 0.5,
+          )
         ],
       ),
-      new Container(child: projectPartyaFiled()),
       new Row(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: <Widget>[
           new Text(
-            "项目描述：",
+            "设备型号：",
             style: new TextStyle(fontSize: 14.0),
           ),
-          Padding(padding: new EdgeInsets.only(left: 20.0)),
+          SizedBox(
+            child: new Container(
+              child: TextField(
+                controller: modelController,
+              ),
+            ),
+            width: widthfull * 0.5,
+          )
         ],
       ),
-      new Container(height: 100.0, child: projectDescFiled()),
+      new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: <Widget>[
+          new Text(
+            "成孔直径：",
+            style: new TextStyle(fontSize: 14.0),
+          ),
+          SizedBox(
+            child: new Container(
+              child: TextField(
+                controller: diameterController,
+              ),
+            ),
+            width: widthfull * 0.5,
+          )
+        ],
+      ),
+      new Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: <Widget>[
+          new Text(
+            "负  责  人：",
+            style: new TextStyle(fontSize: 14.0),
+          ),
+          new DropdownButtonHideUnderline(
+              child: new DropdownButton(
+            hint: new Text('下拉菜单选择一个人名'),
+            value: selectItemValue,
+            items: generateItemList(),
+            onChanged: (T) {
+              setState(() {
+                selectItemValue = T;
+              });
+            },
+          )),
+          // SizedBox(
+          //   child: new Container(
+          //     child: TextField(
+          //       controller: owneridController,
+          //     ),
+          //   ),
+          //   width: widthfull * 0.5,
+          // )
+        ],
+      ),
       Padding(padding: new EdgeInsets.only(bottom: 20.0)),
       new Row(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -256,13 +276,13 @@ class NewProjectPageState extends State<NewProjectPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           new Text(
-            "添加项目图片(只能上传一张):",
+            "添加设备图片(只能上传一张):",
             style: new TextStyle(fontSize: 14.0),
           ),
           Padding(padding: new EdgeInsets.only(left: 20.0)),
         ],
       ),
-      new Container(height: 100.0, child: gridView),
+      new Container(height: 80.0, child: gridView),
       new Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           mainAxisSize: MainAxisSize.min,
@@ -284,7 +304,7 @@ class NewProjectPageState extends State<NewProjectPage> {
                 Navigator.pushAndRemoveUntil(context,
                     new MaterialPageRoute<Null>(
                   builder: (BuildContext context) {
-                    return new ProjectPage();
+                    return new EquipmentPage();
                   },
                 ), (route) => route == null);
               },
@@ -376,30 +396,42 @@ class NewProjectPageState extends State<NewProjectPage> {
   saveProject(ctx) async {
     // String name = userController.text;
     //     String desc = userController.text;
-
-    if (_projectName == null ||
-        _projectName.length == 0 ||
-        _projectName.trim().length == 0) {
+    equipmentName = nameController.text;
+    equipmentBrand = brandController.text;
+    equipmentModel = modelController.text;
+    equipmentDiameter = diameterController.text;
+    ownerid = owneridController.text;
+    if (equipmentName == null ||
+        equipmentName.length == 0 ||
+        equipmentName.trim().length == 0) {
       Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("请输入项目名称！"),
+        content: new Text("请输入名称！"),
+      ));
+      return;
+    }
+    if (ownerid == null || ownerid.length == 0 || ownerid.trim().length == 0) {
+      Scaffold.of(ctx).showSnackBar(new SnackBar(
+        content: new Text("请输入负责人！"),
       ));
       return;
     }
     if (fileList.length == 0) {
       Scaffold.of(ctx).showSnackBar(new SnackBar(
-        content: new Text("请选择项目图片！"),
+        content: new Text("请选择图片！"),
       ));
       return;
     }
     // 下面是调用接口发布动弹的逻辑
     try {
       Map<String, String> params = new Map();
-      params['name'] = _projectName;
-      params['desc'] = _projectDesc;
-      params['partya'] = _partya;
+      params['name'] = equipmentName;
+      params['brand'] = equipmentBrand;
+      params['model'] = equipmentModel;
+      params['diameter'] = equipmentDiameter;
+      params['ownerid'] = ownerid;
       // 构造一个MultipartRequest对象用于上传图片
       var request = new MultipartRequest(
-          'POST', Uri.parse(Constant.baseUrl + "api/v1/project"));
+          'POST', Uri.parse(Constant.baseUrl + "api/v1/equipment"));
       request.fields.addAll(params);
       if (fileList != null && fileList.length > 0) {
         // 这里虽然是添加了多个图片文件，但是开源中国提供的接口只接收一张图片
@@ -439,7 +471,7 @@ class NewProjectPageState extends State<NewProjectPage> {
                 // 成功
                 setState(() {
                   isLoading = false;
-                  msg = "项目名称重复";
+                  msg = "名称重复";
                 });
               } else {
                 setState(() {

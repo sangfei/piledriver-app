@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:piledriver/pages/ProjectPage.dart';
 import 'package:piledriver/pages/StuffPage.dart';
+import 'package:piledriver/pages/Equipment.dart';
 import 'package:piledriver/pages/SettingPage.dart';
 import 'package:piledriver/Utils/cache_util.dart';
 import 'package:piledriver/common/constant.dart';
@@ -23,6 +24,17 @@ class DrawerPageState extends State<DrawerPage> {
           Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
             builder: (BuildContext context) {
               return new ProjectPage();
+            },
+          ), (route) => route == null);
+        },
+      ),
+       new ListTile(
+        leading: new Icon(Icons.people),
+        title: new Text('设备管理'),
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return new EquipmentPage();
             },
           ), (route) => route == null);
         },
@@ -62,7 +74,7 @@ class DrawerPageState extends State<DrawerPage> {
       child: new Stack(children: <Widget>[
         /* 用stack来放背景图片 */
         new Image.asset(
-          'static/images/appbar_def_bg.jpeg',
+          'static/images/drawbg.png',
           fit: BoxFit.fill,
           width: double.infinity,
         ),

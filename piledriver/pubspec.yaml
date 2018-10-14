@@ -68,6 +68,7 @@ flutter:
   # see https://flutter.io/custom-fonts/#from-packages
   assets:
     - static/images/appbar_def_bg.jpeg
+    - static/images/drawbg.png
     - static/images/icon_circle.png
     - static/images/icon_msg.png
     - static/images/icon_sina.png

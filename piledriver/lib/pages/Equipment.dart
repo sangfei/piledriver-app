@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:piledriver/pages/project/TabOne.dart';
+import 'package:piledriver/pages/equipment/TabOne.dart';
+import 'package:piledriver/pages/equipment/NewEquipment1.dart';
 import 'package:piledriver/pages/drawerPage.dart';
-import 'package:piledriver/pages/project/NewProjectPage.dart';
 
 /**
  * 主页
  */
-class ProjectPage extends StatefulWidget {
+class EquipmentPage extends StatefulWidget {
   @override
   State<StatefulWidget> createState() {
-    return ProjectPageState();
+    return EquipmentPageState();
   }
 }
 
-class ProjectPageState extends State<ProjectPage> {
+class EquipmentPageState extends State<EquipmentPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   @override
@@ -34,20 +34,13 @@ class ProjectPageState extends State<ProjectPage> {
                 onPressed: () => _scaffoldKey.currentState.openDrawer()),
             actions: <Widget>[
               new IconButton(
-                  icon: new Icon(Icons.search),
-                  color: Colors.black,
-                  tooltip: '查找项目',
-                  onPressed: () {
-                    // do nothing
-                  }),
-              new IconButton(
                   icon: new Icon(Icons.add_circle),
                   color: Colors.black,
-                  tooltip: '新增项目',
+                  tooltip: '新增设备',
                   onPressed: () {
                     Navigator.of(context)
                         .push(new MaterialPageRoute(builder: (context) {
-                      return new NewProjectPage();
+                      return new TabOne1();
                     }));
                   }),
               new Theme(
@@ -57,9 +50,9 @@ class ProjectPageState extends State<ProjectPage> {
                       itemBuilder: (BuildContext context) =>
                           <PopupMenuItem<String>>[
                             new PopupMenuItem<String>(
-                                value: "name", child: new Text('按项目名称排序')),
+                                value: "name", child: new Text('按名称排序')),
                             new PopupMenuItem<String>(
-                                value: "time", child: new Text('按项目创建时间排序')),
+                                value: "time", child: new Text('按设备类型排序')),
                           ],
                       onSelected: (String action) {
                         switch (action) {
@@ -76,7 +69,7 @@ class ProjectPageState extends State<ProjectPage> {
             backgroundColor: Colors.lightBlueAccent,
             // title: titleWidget(),
             title: new Text(
-              "项目列表",
+              "设备列表",
               style: new TextStyle(color: Colors.black, fontSize: 16.00),
             ),
           ),
