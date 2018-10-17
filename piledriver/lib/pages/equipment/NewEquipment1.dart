@@ -80,24 +80,11 @@ class TabOneState extends State<TabOne1> {
         body: new FutureBuilder(
           // future: _imageFile,
           builder: (BuildContext context, AsyncSnapshot<File> snapshot) {
-            // if (snapshot.connectionState == ConnectionState.done &&
-            //     snapshot.data != null &&
-            //     _image != null) {
-            //   // 选择了图片（拍照或图库选择），添加到List中
-            //   _imageFile = null;
-            // }
-            // 返回的widget
             return buildBody(context);
           },
         ),
       ),
     );
-    // return new Material(
-    //     child: Scaffold(
-    //         // backgroundColor: Colors.lightBlueAccent,
-    //         key: registKey,
-    //         appBar: AppBar(title: Text('增加新设备')),
-    //         body: buildBody(context)));
   }
 
   Widget buildBody(BuildContext context) {
@@ -140,9 +127,11 @@ class TabOneState extends State<TabOne1> {
 
   // 每个条目的信息
   buildProjectItems(context) {
+    final widthfull = MediaQuery.of(context).size.width;
+
     List<Widget> widgets = [];
     widgets.add(new Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.all(10.0),
     ));
     for (int i = 0; i < items.length; i++) {
       var gd = new Row(
@@ -150,7 +139,7 @@ class TabOneState extends State<TabOne1> {
         children: <Widget>[
           new Expanded(
             child: new Container(
-              height: 80.0,
+              height: 70.0,
               padding: const EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
               // decoration: new BoxDecoration(
               //   color: Color.fromRGBO(0, 0, 0, 0.05),
@@ -158,12 +147,16 @@ class TabOneState extends State<TabOne1> {
               // ),
               child: new Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: TextField(
+                child: new TextField(
                   controller: controllers[i],
-                  decoration: InputDecoration(
-                      // fillColor: Colors.blue.shade100,
-                      filled: true,
-                      labelText: items[i]),
+                  // enabled: !snapshot.data,
+                  style: new TextStyle(fontSize: 16.0, color: Colors.black),
+                  decoration: new InputDecoration(
+                      // hintText: '请输入手机号',
+                      labelText: items[i],
+                      labelStyle: TextStyle(
+                          fontWeight: FontWeight.w700, fontSize: 15.0),
+                      hintStyle: TextStyle(fontSize: 14.0)),
                 ),
               ),
             ),
@@ -173,7 +166,7 @@ class TabOneState extends State<TabOne1> {
       widgets.add(gd);
     }
     var dropdown = new Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         new Expanded(
           child: new Container(
@@ -184,18 +177,26 @@ class TabOneState extends State<TabOne1> {
             //   border: new Border(bottom: new BorderSide(color: Colors.black)),
             // ),
             child: new Row(children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: new Text(
-                    "负责人：",
-                    style: new TextStyle(fontSize: 18.0),
-                  )),
-              Padding(
-                padding: const EdgeInsets.only(left: 10.0),
+              SizedBox(
+                width: widthfull * 0.3,
+                // height: 40.0,
+                child: new Text(
+                  "负责人：",
+                  style: TextStyle(
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15.0),
+                ),
+              ),
+              SizedBox(
+                width: widthfull * 0.7 - 40,
+                height: 40.0,
                 child: new DropdownButton(
-                  hint: new Text('下拉菜单选择一个人名'),
-                  //设置这个value之后,选中对应位置的item，
-                  //再次呼出下拉菜单，会自动定位item位置在当前按钮显示的位置处
+                  hint: new Text(
+                    "请选择负责人",
+                    style:
+                        TextStyle(fontWeight: FontWeight.w700, fontSize: 15.0),
+                  ),
                   value: selectItemValue,
                   items: generateItemList(),
                   onChanged: (T) {
@@ -204,7 +205,7 @@ class TabOneState extends State<TabOne1> {
                     });
                   },
                 ),
-              )
+              ),
             ]),
           ),
         )
@@ -219,17 +220,18 @@ class TabOneState extends State<TabOne1> {
           child: new Container(
             height: 70.0,
             padding: const EdgeInsets.fromLTRB(20.0, 5.0, 20.0, 5.0),
-            // decoration: new BoxDecoration(
-            //   color: Color.fromRGBO(0, 0, 0, 0.05),
-            //   border: new Border(bottom: new BorderSide(color: Colors.black)),
-            // ),
             child: new Row(children: <Widget>[
-              Padding(
-                  padding: const EdgeInsets.only(left: 15.0),
-                  child: new Text(
-                    "设备照片：",
-                    style: new TextStyle(fontSize: 18.0),
-                  )),
+              SizedBox(
+                width: widthfull * 0.3,
+                // height: 40.0,
+                child: new Text(
+                  "设备照片：",
+                  style: TextStyle(
+                      color: Colors.black54,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15.0),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.only(left: 10.0),
                 child: new GestureDetector(
@@ -239,7 +241,7 @@ class TabOneState extends State<TabOne1> {
                   },
                   child: new Center(
                       child: _image == null
-                          ? new Text('No image selected.')
+                          ? new Text('点我选择照片')
                           : new CircleAvatar(
                               backgroundImage: new FileImage(_image),
                               radius: 50.0,
@@ -253,14 +255,39 @@ class TabOneState extends State<TabOne1> {
     );
 
     widgets.add(img);
-    var btn = new Center(
-      child: new RaisedButton(
-        child: const Text('Save'),
-        onPressed: () {
-          saveProject(context);
-        },
-      ),
-    );
+    var btn = Padding(
+        padding: const EdgeInsets.only(left: 20.0, right: 20.0, top: 10.0),
+        child: Material(
+          //带给我们Material的美丽风格美滋滋。你也多看看这个布局
+          elevation: 10.0,
+          color: Colors.transparent,
+          shape: const StadiumBorder(),
+          child: InkWell(
+            onTap: () {
+               saveProject(context);
+              // _Login(this._userPhone, this._passWold, context);
+            },
+            //来个飞溅美滋滋。
+            splashColor: Colors.purpleAccent,
+            child: Ink(
+              height: 40.0,
+              decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                colors: <Color>[Color(0xFF4DD0E1), Color(0xFF00838F)],
+              )),
+              child: Center(
+                child: Text(
+                  '保存',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.normal,
+                      fontSize: 20.0),
+                ),
+              ),
+            ),
+          ),
+        ));
 
     widgets.add(btn);
 
@@ -291,8 +318,6 @@ class TabOneState extends State<TabOne1> {
   }
 
   saveProject(ctx) async {
-    // String name = userController.text;
-    //     String desc = userController.text;
     equipmentName = nameController.text;
     equipmentBrand = brandController.text;
     equipmentModel = modelController.text;
@@ -306,7 +331,9 @@ class TabOneState extends State<TabOne1> {
       ));
       return;
     }
-    if (ownerid == 'null' || ownerid.length == 0 || ownerid.trim().length == 0) {
+    if (ownerid == 'null' ||
+        ownerid.length == 0 ||
+        ownerid.trim().length == 0) {
       Scaffold.of(ctx).showSnackBar(new SnackBar(
         content: new Text("请输入负责人！"),
       ));

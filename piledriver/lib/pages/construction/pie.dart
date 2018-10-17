@@ -1,5 +1,6 @@
 import 'package:charts_flutter/flutter.dart' as charts;
 import 'package:flutter/material.dart';
+import 'package:piledriver/bean/StatBean.dart';
 
 class DonutAutoLabelChart extends StatelessWidget {
   final List<charts.Series> seriesList;
@@ -16,6 +17,13 @@ class DonutAutoLabelChart extends StatelessWidget {
     );
   }
 
+  factory DonutAutoLabelChart.withGivingData(List<StatBean> datas) {
+    return new DonutAutoLabelChart(
+      _createData(datas),
+      // Disable animations for image tests.
+      animate: true,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,12 +51,32 @@ class DonutAutoLabelChart extends StatelessWidget {
   }
 
   /// Create one series with sample hard coded data.
+  static List<charts.Series<LinearSales, int>> _createData(
+      List<StatBean> givingdatas) {
+    List<LinearSales> data = [];
+    for (int i = 0; i < givingdatas.length; i++) {
+      data.add(new LinearSales(givingdatas[i].id, givingdatas[i].pieces));
+    }
+
+    return [
+      new charts.Series<LinearSales, int>(
+        id: 'Sales',
+        domainFn: (LinearSales sales, _) => sales.year,
+        measureFn: (LinearSales sales, _) => sales.sales,
+        data: data,
+        // Set a label accessor to control the text of the arc label.
+        labelAccessorFn: (LinearSales row, _) => '${row.year}: ${row.sales}',
+      )
+    ];
+  }
+
+  /// Create one series with sample hard coded data.
   static List<charts.Series<LinearSales, int>> _createSampleData() {
     final data = [
-      new LinearSales(0, 100),
-      new LinearSales(1, 75),
-      new LinearSales(2, 25),
-      new LinearSales(3, 5),
+      new LinearSales(0, 100.0),
+      new LinearSales(1, 75.0),
+      new LinearSales(2, 25.0),
+      new LinearSales(3, 5.0),
     ];
 
     return [
@@ -67,7 +95,7 @@ class DonutAutoLabelChart extends StatelessWidget {
 /// Sample linear data type.
 class LinearSales {
   final int year;
-  final int sales;
+  final double sales;
 
   LinearSales(this.year, this.sales);
 }

@@ -8,6 +8,8 @@ class CacheUtil {
 
   static StuffBean _stuff;
 
+  static DateTime _selectedTime;
+
   static CacheUtil getInstance() {
     if (_singleton == null) {
       _singleton = new CacheUtil._internal();
@@ -21,6 +23,7 @@ class CacheUtil {
 
   _init() {
     _themeModelList = [];
+    _selectedTime = null;
     _stuff = new StuffBean(0,0,'','','','','');
   }
 
@@ -30,6 +33,17 @@ class CacheUtil {
 
   getThemeListCache() {
     return _themeModelList;
+  }
+
+  setTime(DateTime time)
+  {
+    _selectedTime = time;
+  }
+
+  DateTime getTime()
+  {
+    print("==========_selectedTime:"+_selectedTime.toString());
+    return _selectedTime;
   }
 
   setUser(StuffBean stuff)

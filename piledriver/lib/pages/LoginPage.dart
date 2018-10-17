@@ -292,13 +292,13 @@ class _LoginPageState extends State<LoginPage> {
               Card(
                 color: Colors.white70,
                 margin: EdgeInsets.only(
-                    top: 190.0, right: 50.0, left: 50.0, bottom: 100.0),
+                    top: 190.0, right: 20.0, left: 20.0, bottom: 100.0),
                 elevation: 11.0,
                 child: Container(
                   alignment: Alignment.center,
                   width: widthfull - 120,
                   child: new Container(
-                    margin: new EdgeInsets.all(16.0),
+                    margin: new EdgeInsets.all(30.0),
                     child: ListView(
                       children: <Widget>[
                         new Text('欧森奥建筑工程有限公司',

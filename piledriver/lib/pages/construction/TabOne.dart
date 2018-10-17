@@ -3,12 +3,14 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:piledriver/bean/WorkRegionBean.dart';
+import 'package:piledriver/bean/StatBean.dart';
 import 'package:piledriver/bean/ConstructionBean.dart';
 import 'package:piledriver/common/constant.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:piledriver/pages/construction/pie.dart';
+import 'package:piledriver/Utils/cache_util.dart';
 
 class TabOne extends StatefulWidget {
   final WorkRegionBean workRegion;
@@ -23,13 +25,42 @@ class TabOne extends StatefulWidget {
 
 class TabOneState extends State<TabOne> {
   List<ConstructionBean> datas = [];
+  List<StatBean> statDatas = [];
+
   bool loading = true;
   List<Widget> widgetList = List();
-  String now = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  static DateTime datenow = CacheUtil.getInstance().getTime() == null
+      ? DateTime.now()
+      : CacheUtil.getInstance().getTime();
+  String now = DateFormat('yyyy-MM-dd').format(datenow);
+  static DateTime nextDay =
+      new DateTime.utc(datenow.year, datenow.month, datenow.day)
+          .add(new Duration(days: 1));
+  String utcStartTime = DateTime.parse(DateFormat('yyyy-MM-dd').format(datenow))
+      .millisecondsSinceEpoch
+      .toString();
+  String utcEndTime = DateTime.parse(DateFormat('yyyy-MM-dd').format(nextDay))
+      .millisecondsSinceEpoch
+      .toString();
   @override
   void initState() {
     super.initState();
+
+    datenow = CacheUtil.getInstance().getTime() == null
+        ? DateTime.now()
+        : CacheUtil.getInstance().getTime();
+    now = DateFormat('yyyy-MM-dd').format(datenow);
+    nextDay = new DateTime.utc(datenow.year, datenow.month, datenow.day)
+        .add(new Duration(days: 1));
+    utcStartTime = DateTime.parse(DateFormat('yyyy-MM-dd').format(datenow))
+        .millisecondsSinceEpoch
+        .toString();
+    utcEndTime = DateTime.parse(DateFormat('yyyy-MM-dd').format(nextDay))
+        .millisecondsSinceEpoch
+        .toString();
+
     getApiData();
+    getStatData();
   }
 
   @override
@@ -48,9 +79,7 @@ class TabOneState extends State<TabOne> {
           child: new CircularProgressIndicator(),
         );
       } else {
-        content = new Center(
-          child: new Text('没有数据'),
-        );
+        content = buildEmptyContent();
       }
     } else {
       content = buildContent();
@@ -60,6 +89,32 @@ class TabOneState extends State<TabOne> {
       backgroundColor: Colors.white,
       body: content,
     );
+  }
+
+  Widget buildEmptyContent() {
+    widgetList.clear();
+    widgetList.add(
+      Padding(padding: new EdgeInsets.only(bottom: 20.0)),
+    );
+    widgetList.add(
+      new Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: _buildHeader()),
+    );
+
+    print(widgetList.length);
+    return new Scaffold(
+        backgroundColor: Colors.white,
+        body: CustomScrollView(slivers: <Widget>[
+          new SliverList(
+            delegate: new SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return widgetList[index];
+              },
+              childCount: widgetList.length,
+            ),
+          )
+        ]));
   }
 
   Widget buildContent() {
@@ -93,7 +148,7 @@ class TabOneState extends State<TabOne> {
         color: Colors.blue[100],
         width: (MediaQuery.of(context).size.width),
         height: 22.0,
-        child: Text("  按排号统计"),
+        child: Text("  按设备统计"),
       ),
     );
     widgetList.add(
@@ -103,25 +158,7 @@ class TabOneState extends State<TabOne> {
       new SizedBox(
           height: 200.0,
           width: (MediaQuery.of(context).size.width),
-          child: new DonutAutoLabelChart.withSampleData()),
-    );
-
-    widgetList.add(
-      Container(
-        color: Colors.blue[100],
-        width: (MediaQuery.of(context).size.width),
-        height: 22.0,
-        child: Text("  按班组统计"),
-      ),
-    );
-    widgetList.add(
-      Padding(padding: new EdgeInsets.only(bottom: 20.0)),
-    );
-    widgetList.add(
-      new SizedBox(
-          height: 200.0,
-          width: (MediaQuery.of(context).size.width),
-          child: new DonutAutoLabelChart.withSampleData()),
+          child: new DonutAutoLabelChart.withGivingData(statDatas)),
     );
 
     widgetList.add(
@@ -138,47 +175,17 @@ class TabOneState extends State<TabOne> {
           children: _buildDetailHeader()),
     );
     buildContructionDetail();
-
-    //  new Container(
-    //     // color: Colors.white54,
-    //     child: new Padding(
-    //         padding: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 0.0),
-    //         child: new Column(children: <Widget>[
-    //           Padding(padding: new EdgeInsets.only(top: 10.0)),
-    //           new Row(
-    //               mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //               children: _buildHeader()),
-    //           Container(
-    //             color: Colors.grey,
-    //             width: (MediaQuery.of(context).size.width - 30.0),
-    //             height: 0.3,
-    //           ),
-    //           Padding(padding: new EdgeInsets.only(top: 20.0)),
-    //           new SizedBox(
-    //               height: (MediaQuery.of(context).size.width) * 0.6,
-    //               width: (MediaQuery.of(context).size.width),
-    //               child: new DonutAutoLabelChart.withSampleData()),
-    //           Padding(padding: new EdgeInsets.only(top: 10.0)),
-    // Container(
-    //   color: Colors.blue[100],
-    //   width: (MediaQuery.of(context).size.width),
-    //   height: 22.0,
-    //   child: Text("  施工详情"),
-    // ),
-    //   new Row(
-    //       mainAxisAlignment: MainAxisAlignment.spaceAround,
-    //       children: _buildDetailHeader()),
-    //   Flexible(
-    //       child: new ListView(
-    //           padding: const EdgeInsets.all(1.0),
-    //           children: buildContructionDetail()))
-    // ])));
   }
 
   Future getApiData() async {
     print("get construction");
     var url = Constant.baseUrl +
-        '/api/v1/construction?start=1535789325&end=1535789326&workregion=${widget.workRegion.id}';
+        '/api/v1/construction?start=' +
+        utcStartTime.toString() +
+        '&end=' +
+        utcEndTime.toString() +
+        '&workregion=${widget.workRegion.id}';
+    print(url);
     var httpClient = new HttpClient();
     var request = await httpClient.getUrl(Uri.parse(url));
     var response = await request.close();
@@ -186,6 +193,27 @@ class TabOneState extends State<TabOne> {
       var jsonData = await response.transform(utf8.decoder).join();
       setState(() {
         datas = ConstructionBean.decodeData(jsonData);
+        loading = false;
+      });
+    }
+  }
+
+  Future getStatData() async {
+    print("get construction");
+    var url = Constant.baseUrl +
+        '/api/v1/construction/stat?start=' +
+        utcStartTime.toString() +
+        '&end=' +
+        utcEndTime.toString() +
+        '&workregion=${widget.workRegion.id}';
+    print(url);
+    var httpClient = new HttpClient();
+    var request = await httpClient.getUrl(Uri.parse(url));
+    var response = await request.close();
+    if (response.statusCode == 200) {
+      var jsonData = await response.transform(utf8.decoder).join();
+      setState(() {
+        statDatas = StatBean.decodeData(jsonData);
         loading = false;
       });
     }
@@ -210,7 +238,6 @@ class TabOneState extends State<TabOne> {
   }
 
   _buildDetailHeader() {
-    ConstructionBean data = datas[0];
     List<Widget> widgets = [];
     // var date = new DateTime.fromMillisecondsSinceEpoch(utc*1000);
     // var now = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -247,7 +274,7 @@ class TabOneState extends State<TabOne> {
                 children: <Widget>[
                   new Container(
                     child: new Text(
-                      "桩号",
+                      "设备号",
                       style: new TextStyle(fontSize: 12.0, color: Colors.black),
                     ),
                   ),
@@ -268,7 +295,7 @@ class TabOneState extends State<TabOne> {
                 children: <Widget>[
                   new Container(
                     child: new Text(
-                      "排号",
+                      "责任人",
                       style: new TextStyle(fontSize: 12.0, color: Colors.black),
                     ),
                   ),
@@ -289,7 +316,7 @@ class TabOneState extends State<TabOne> {
                 children: <Widget>[
                   new Container(
                     child: new Text(
-                      "桩长",
+                      "成桩量",
                       style: new TextStyle(fontSize: 12.0, color: Colors.black),
                     ),
                   ),
@@ -303,7 +330,10 @@ class TabOneState extends State<TabOne> {
   }
 
   _buildHeader() {
-    ConstructionBean data = datas[0];
+    StatBean data = new StatBean(0, '', 0.0);
+    if (statDatas.isNotEmpty) {
+      data = statDatas[0];
+    }
     List<Widget> widgets = [];
     // var date = new DateTime.fromMillisecondsSinceEpoch(utc*1000);
     // var now = DateFormat('yyyy-MM-dd').format(DateTime.now());
@@ -345,6 +375,18 @@ class TabOneState extends State<TabOne> {
                                     setState(() {
                                       now =
                                           DateFormat('yyyy-MM-dd').format(date);
+                                      utcStartTime = DateTime.parse(now)
+                                          .millisecondsSinceEpoch
+                                          .toString();
+                                      DateTime nextDay = new DateTime.utc(
+                                              date.year, date.month, date.day)
+                                          .add(new Duration(days: 1));
+                                      utcEndTime = nextDay
+                                          .millisecondsSinceEpoch
+                                          .toString();
+                                      getApiData();
+                                      getStatData();
+                                      CacheUtil.getInstance().setTime(date);
                                     });
                                   },
                                       currentTime: DateTime.parse(now),
@@ -444,8 +486,8 @@ class TabOneState extends State<TabOne> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             OneRowOfDetail(i, Colors.grey),
-            OneRowOfDetail(data.pieces, Colors.black),
-            OneRowOfDetail(data.pieces, Colors.black),
+            OneRowOfDetail(data.equipmentid, Colors.black),
+            OneRowOfDetail(data.ownerid, Colors.black),
             OneRowOfDetail(data.pieces, Colors.black),
           ]),
       decoration: const BoxDecoration(
