@@ -4,16 +4,12 @@ import 'dart:convert';
  * statistic class
  */
 class StatBean {
-  final int id;
-  final String type; //项目名称
-  final double pieces; //项目详情描述
-
-  StatBean(
-      this.id, this.type, this.pieces);
-  static List<StatBean> datas = new List<StatBean>();
+  int id = 0;
+  String type = ''; //项目名称
+  double pieces = 0.0; //项目详情描述
 
   static List<StatBean> decodeData(String data) {
-    datas.clear();
+    List<StatBean> datas = new List<StatBean>();
     var newData = json.decode(data);
     print('$newData');
 
@@ -25,8 +21,10 @@ class StatBean {
   }
 
   static StatBean map(subject) {
-    print('$subject');
-    return new StatBean(subject['id'], subject['name'].toString(),
-        subject['pieces']);
+    var bean = new StatBean();
+    bean.id = subject['id'];
+    bean.type = subject['type'].toString();
+    bean.pieces = subject['pieces'];
+    return bean;
   }
 }

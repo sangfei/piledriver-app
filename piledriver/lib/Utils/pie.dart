@@ -17,9 +17,10 @@ class DonutAutoLabelChart extends StatelessWidget {
     );
   }
 
-  factory DonutAutoLabelChart.withGivingData(List<StatBean> datas) {
+  factory DonutAutoLabelChart.withGivingData(
+      List<StatBean> datas, String type) {
     return new DonutAutoLabelChart(
-      _createData(datas),
+      _createData(datas, type),
       // Disable animations for image tests.
       animate: true,
     );
@@ -29,21 +30,6 @@ class DonutAutoLabelChart extends StatelessWidget {
   Widget build(BuildContext context) {
     return new charts.PieChart(seriesList,
         animate: animate,
-        // Configure the width of the pie slices to 60px. The remaining space in
-        // the chart will be left as a hole in the center.
-        //
-        // [ArcLabelDecorator] will automatically position the label inside the
-        // arc if the label will fit. If the label will not fit, it will draw
-        // outside of the arc with a leader line. Labels can always display
-        // inside or outside using [LabelPosition].
-        //
-        // Text style for inside / outside can be controlled independently by
-        // setting [insideLabelStyleSpec] and [outsideLabelStyleSpec].
-        //
-        // Example configuring different styles for inside/outside:
-        //       new charts.ArcLabelDecorator(
-        //          insideLabelStyleSpec: new charts.TextStyleSpec(...),
-        //          outsideLabelStyleSpec: new charts.TextStyleSpec(...)),
         defaultRenderer: new charts.ArcRendererConfig(arcRendererDecorators: [
           new charts.ArcLabelDecorator(
               labelPosition: charts.ArcLabelPosition.auto)
@@ -52,10 +38,13 @@ class DonutAutoLabelChart extends StatelessWidget {
 
   /// Create one series with sample hard coded data.
   static List<charts.Series<LinearSales, int>> _createData(
-      List<StatBean> givingdatas) {
+      List<StatBean> givingdatas, String type) {
     List<LinearSales> data = [];
     for (int i = 0; i < givingdatas.length; i++) {
-      data.add(new LinearSales(givingdatas[i].id, givingdatas[i].pieces));
+      if (givingdatas[i].type == type) {
+        print("in pie:"+type);
+        data.add(new LinearSales(givingdatas[i].id, givingdatas[i].pieces));
+      }
     }
 
     return [

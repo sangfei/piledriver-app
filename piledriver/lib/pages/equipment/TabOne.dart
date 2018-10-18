@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:piledriver/bean/Equipment.dart';
-import 'package:piledriver/pages/WorkRegion.dart';
+import 'package:piledriver/pages/EquipmentDetail.dart';
 import 'package:piledriver/common/constant.dart';
 
 class TabOne extends StatefulWidget {
@@ -71,9 +71,9 @@ class TabOneState extends State<TabOne> {
       Equipment data = datas[i];
       var gd = new GestureDetector(
         onTap: () {
-          // Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
-          //   return new WorkRegionPage(data);
-          // }));
+          Navigator.of(context).push(new MaterialPageRoute(builder: (context) {
+            return new EquipmentDetailPage(data);
+          }));
         },
         child: new Column(
           children: <Widget>[
