@@ -31,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<StuffBean> getApiData() async {
     //当前的项目列表
-    StuffBean ret = new StuffBean(0, 0, '', '', '', '', '');
+    StuffBean ret = new StuffBean();
     var url = Constant.baseUrl + '/api/v1/stuff?phone=$_phoneNum';
     var httpClient = new HttpClient();
     var request = await httpClient.getUrl(Uri.parse(url));
@@ -172,6 +172,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildBody() {
+    final widthfull = MediaQuery.of(context).size.width;
     return new Container(
         color: Colors.amber[200],
         child: new Center(
@@ -202,7 +203,7 @@ class _LoginPageState extends State<LoginPage> {
                       children: <Widget>[
                         new Image(
                             image: new AssetImage(GSYICons.DEFAULT_USER_ICON),
-                            width: 90.0,
+                            width: widthfull,
                             height: 90.0),
                         new Padding(padding: new EdgeInsets.all(10.0)),
                         new GSYInputWidget(

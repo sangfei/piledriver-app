@@ -1,5 +1,7 @@
 PODS:
   - Flutter (1.0.0)
+  - flutter_picker (0.0.1):
+    - Flutter
   - flutter_webview_plugin (0.0.1):
     - Flutter
   - fluttertoast (0.0.2):
@@ -13,6 +15,7 @@ PODS:
 
 DEPENDENCIES:
   - Flutter (from `.symlinks/flutter/ios`)
+  - flutter_picker (from `.symlinks/plugins/flutter_picker/ios`)
   - flutter_webview_plugin (from `.symlinks/plugins/flutter_webview_plugin/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
@@ -22,6 +25,8 @@ DEPENDENCIES:
 EXTERNAL SOURCES:
   Flutter:
     :path: ".symlinks/flutter/ios"
+  flutter_picker:
+    :path: ".symlinks/plugins/flutter_picker/ios"
   flutter_webview_plugin:
     :path: ".symlinks/plugins/flutter_webview_plugin/ios"
   fluttertoast:
@@ -35,6 +40,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: 9d0fac939486c9aba2809b7982dfdbb47a7b0296
+  flutter_picker: 8cd16302a9806a9789ba6e3ce85558c70c43b7f4
   flutter_webview_plugin: 116575b48572029304775b768e9f15ebfc316274
   fluttertoast: ad0527b15297baf11349f3f581dae4d40f24f340
   image_picker: ee00aab0487cedc80a304085219503cc6d0f2e22

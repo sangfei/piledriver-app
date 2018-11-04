@@ -4,18 +4,17 @@ import 'dart:convert';
  * project class
  */
 class StuffBean {
-  final int stuffID;
-  final int title;
-  final String name; //名称
-  final String sex; //名称
-  final String phone; //名称
-  final String birth; //名称
-  final String pwd; //名称
- 
-  StuffBean(this.stuffID, this.title, this.name, this.sex, this.phone, this.birth, this.pwd);
-  static List<StuffBean> datas = new List<StuffBean>();
+  int stuffID;
+  int title;
+  String name; //名称
+  String sex; //名称
+  String phone; //名称
+  String birth; //名称
+  String pwd; //名称
 
   static List<StuffBean> decodeData(String data) {
+    List<StuffBean> datas = new List<StuffBean>();
+
     datas.clear();
     var newData = json.decode(data);
     //肯定首先是知道他是一个数组，或者是集合
@@ -26,18 +25,24 @@ class StuffBean {
   }
 
   static StuffBean map(subject) {
-    return new StuffBean(subject['id'], subject['title'], subject['name'].toString(),
-        subject['sex'].toString(),subject['phone'].toString(),subject['birth'].toString(),subject['pwd'].toString());
+    var bean = new StuffBean();
+    bean.stuffID = subject['id'];
+    bean.title = subject['title'];
+    bean.name = subject['name'].toString();
+    bean.sex = subject['sex'].toString();
+    bean.phone = subject['phone'].toString();
+    bean.birth = subject['birth'].toString();
+    bean.pwd = subject['pwd'].toString();
+    return bean;
   }
 
-  Map<String, dynamic> toJson() =>
-    {
-      'id': stuffID,
-      'title': title,
-      'name': name,
-      'sex': sex,
-      'phone': phone,
-      'birth': birth,
-      'pwd': pwd,
-    };
+  Map<String, dynamic> toJson() => {
+        'id': stuffID,
+        'title': title,
+        'name': name,
+        'sex': sex,
+        'phone': phone,
+        'birth': birth,
+        'pwd': pwd,
+      };
 }

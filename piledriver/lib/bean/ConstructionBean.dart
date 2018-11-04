@@ -19,8 +19,7 @@ class ConstructionBean {
   static List<ConstructionBean> decodeData(String data) {
     List<ConstructionBean> datas = new List<ConstructionBean>();
     var newData = json.decode(data);
-    print('$newData');
-
+ 
     //肯定首先是知道他是一个数组，或者是集合
     for (int i = 0; i < newData.length; i++) {
       datas.add(map(newData[i]));

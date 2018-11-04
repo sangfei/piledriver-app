@@ -1,7 +1,7 @@
 import 'package:piledriver/model/theme_model.dart';
 import 'package:piledriver/bean/stuffBean.dart';
-class CacheUtil {
 
+class CacheUtil {
   static List<ThemeModel> _themeModelList;
 
   static CacheUtil _singleton;
@@ -9,6 +9,8 @@ class CacheUtil {
   static StuffBean _stuff;
 
   static DateTime _selectedTime;
+
+  static DateTime _selectedEndTime;
 
   static CacheUtil getInstance() {
     if (_singleton == null) {
@@ -24,7 +26,9 @@ class CacheUtil {
   _init() {
     _themeModelList = [];
     _selectedTime = null;
-    _stuff = new StuffBean(0,0,'','','','','');
+    _selectedEndTime = null;
+
+    _stuff = new StuffBean();
   }
 
   setThemeListCache(List<ThemeModel> list) {
@@ -35,24 +39,27 @@ class CacheUtil {
     return _themeModelList;
   }
 
-  setTime(DateTime time)
-  {
+  setTime(DateTime time) {
     _selectedTime = time;
   }
 
-  DateTime getTime()
-  {
-    print("==========_selectedTime:"+_selectedTime.toString());
+  setEndTime(DateTime time) {
+    _selectedEndTime = time;
+  }
+
+  DateTime getEndTime() {
+    return _selectedEndTime;
+  }
+
+  DateTime getTime() {
     return _selectedTime;
   }
 
-  setUser(StuffBean stuff)
-  {
+  setUser(StuffBean stuff) {
     _stuff = stuff;
   }
 
-  StuffBean getUser()
-  {
+  StuffBean getUser() {
     return _stuff;
   }
 }

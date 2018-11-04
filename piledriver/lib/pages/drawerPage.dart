@@ -1,9 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:piledriver/pages/ProjectPage.dart';
+import 'package:piledriver/pages/report/NewReport.dart';
 import 'package:piledriver/pages/StuffPage.dart';
 import 'package:piledriver/pages/Equipment.dart';
 import 'package:piledriver/pages/SettingPage.dart';
+import 'package:piledriver/pages/ReportPage.dart';
 import 'package:piledriver/Utils/cache_util.dart';
 import 'package:piledriver/common/constant.dart';
 
@@ -29,7 +31,7 @@ class DrawerPageState extends State<DrawerPage> {
         },
       ),
        new ListTile(
-        leading: new Icon(Icons.people),
+        leading: new Icon(Icons.view_agenda),
         title: new Text('设备管理'),
         onTap: () {
           Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
@@ -46,6 +48,27 @@ class DrawerPageState extends State<DrawerPage> {
           Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
             builder: (BuildContext context) {
               return new StuffPage();
+            },
+          ), (route) => route == null);
+        },
+      ),
+      new ListTile(
+        leading: new Icon(Icons.pie_chart),
+        title: new Text('统计报表'),
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return new ReportPage();
+            },
+          ), (route) => route == null);
+        },
+      ),      new ListTile(
+        leading: new Icon(Icons.edit),
+        title: new Text('施工填报'),
+        onTap: () {
+          Navigator.pushAndRemoveUntil(context, new MaterialPageRoute<Null>(
+            builder: (BuildContext context) {
+              return new NewReport();
             },
           ), (route) => route == null);
         },

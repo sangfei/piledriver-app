@@ -1,8 +1,7 @@
 
 class Constant {
 
-  // static const  String baseUrl="http://49.4.54.72:32500/";
-  static const  String baseUrl="http://127.0.0.1:8080/";
+  static const  String baseUrl="http://49.4.54.72:32500/";
   //宽高常量
   static const double bannerHeight = 200.0;
   static const double normalItemHeight = 100.0;

@@ -41,7 +41,7 @@ Future<StuffBean> _readLoginData(File file) async {
   } on FileSystemException {
     // 发生异常时返回默认值
     print("read exception");
-    return new StuffBean(0, 0, '', '', '', '', '');
+    return new StuffBean();
   }
 }
 

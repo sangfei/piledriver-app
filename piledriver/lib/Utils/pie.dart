@@ -8,15 +8,6 @@ class DonutAutoLabelChart extends StatelessWidget {
 
   DonutAutoLabelChart(this.seriesList, {this.animate});
 
-  /// Creates a [PieChart] with sample data and no transition.
-  factory DonutAutoLabelChart.withSampleData() {
-    return new DonutAutoLabelChart(
-      _createSampleData(),
-      // Disable animations for image tests.
-      animate: true,
-    );
-  }
-
   factory DonutAutoLabelChart.withGivingData(
       List<StatBean> datas, String type) {
     return new DonutAutoLabelChart(
@@ -37,54 +28,35 @@ class DonutAutoLabelChart extends StatelessWidget {
   }
 
   /// Create one series with sample hard coded data.
-  static List<charts.Series<LinearSales, int>> _createData(
+  static List<charts.Series<LinearSales, String>> _createData(
       List<StatBean> givingdatas, String type) {
     List<LinearSales> data = [];
     for (int i = 0; i < givingdatas.length; i++) {
-      if (givingdatas[i].type == type) {
-        print("in pie:"+type);
-        data.add(new LinearSales(givingdatas[i].id, givingdatas[i].pieces));
+      if (givingdatas[i].pieces <= 0) {
+        print("in pie has zero number:" + type);
+        continue;
       }
+      data.add(new LinearSales(givingdatas[i].equipmentname, givingdatas[i].pieces));
     }
 
     return [
-      new charts.Series<LinearSales, int>(
+      new charts.Series<LinearSales, String>(
         id: 'Sales',
-        domainFn: (LinearSales sales, _) => sales.year,
+        domainFn: (LinearSales sales, _) => sales.name,
         measureFn: (LinearSales sales, _) => sales.sales,
         data: data,
         // Set a label accessor to control the text of the arc label.
-        labelAccessorFn: (LinearSales row, _) => '${row.year}: ${row.sales}',
+        labelAccessorFn: (LinearSales row, _) => '${row.name}: ${row.sales}',
       )
     ];
   }
 
-  /// Create one series with sample hard coded data.
-  static List<charts.Series<LinearSales, int>> _createSampleData() {
-    final data = [
-      new LinearSales(0, 100.0),
-      new LinearSales(1, 75.0),
-      new LinearSales(2, 25.0),
-      new LinearSales(3, 5.0),
-    ];
-
-    return [
-      new charts.Series<LinearSales, int>(
-        id: 'Sales',
-        domainFn: (LinearSales sales, _) => sales.year,
-        measureFn: (LinearSales sales, _) => sales.sales,
-        data: data,
-        // Set a label accessor to control the text of the arc label.
-        labelAccessorFn: (LinearSales row, _) => '长长的: ${row.sales}',
-      )
-    ];
-  }
 }
 
 /// Sample linear data type.
 class LinearSales {
-  final int year;
+  final String name;
   final double sales;
 
-  LinearSales(this.year, this.sales);
+  LinearSales(this.name, this.sales);
 }

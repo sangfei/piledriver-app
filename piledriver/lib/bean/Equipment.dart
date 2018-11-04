@@ -4,18 +4,16 @@ import 'dart:convert';
  * project class
  */
 class Equipment {
-  final int equipmentid;
-  final String equipmentName;
-  final String equipmentBrand;
-  final String equipmentModel;
-  final String equipmentDiameter;
-  final int ownerid; //项目详情描述
-
-  Equipment(this.equipmentid, this.equipmentName, this.equipmentBrand,
-      this.equipmentModel, this.equipmentDiameter, this.ownerid);
-  static List<Equipment> datas = new List<Equipment>();
+  int equipmentid;
+  String equipmentName;
+  String equipmentBrand;
+  String equipmentModel;
+  String equipmentDiameter;
+  int ownerid; //项目详情描述
 
   static List<Equipment> decodeData(String data) {
+    List<Equipment> datas = new List<Equipment>();
+
     datas.clear();
     var newData = json.decode(data);
     print('$newData');
@@ -28,13 +26,14 @@ class Equipment {
   }
 
   static Equipment map(subject) {
-    print('$subject');
-    return new Equipment(
-        subject['id'],
-        subject['name'].toString(),
-        subject['brand'].toString(),
-        subject['model'].toString(),
-        subject['diameter'].toString(),
-        subject['ownerid']);
+    var bean = new Equipment();
+
+    bean.equipmentid = subject['id'];
+    bean.equipmentName = subject['name'].toString();
+    bean.equipmentBrand = subject['brand'].toString();
+    bean.equipmentModel = subject['model'].toString();
+    bean.equipmentDiameter = subject['diameter'].toString();
+    bean.ownerid = subject['ownerid'];
+    return bean;
   }
 }

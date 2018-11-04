@@ -5,8 +5,17 @@ import 'dart:convert';
  */
 class StatBean {
   int id = 0;
-  String type = ''; //项目名称
-  double pieces = 0.0; //项目详情描述
+  int projectid = 0;
+  int workregionid = 0;
+  int equipmentid = 0;
+  int ownerid = 0;
+  String projectname;
+  String workregionname;
+  String equipmentname;
+  String ownername;
+  String type = '';
+  double pieces = 0.0;
+  double totalpieces = 0.0;
 
   static List<StatBean> decodeData(String data) {
     List<StatBean> datas = new List<StatBean>();
@@ -25,6 +34,15 @@ class StatBean {
     bean.id = subject['id'];
     bean.type = subject['type'].toString();
     bean.pieces = subject['pieces'];
+    bean.totalpieces = subject['totalpieces'];
+    bean.projectname = subject['projectname'];
+    bean.workregionname = subject['workregionname'];
+    bean.equipmentname = subject['equipmentname'];
+    bean.ownername = subject['ownername'];
+    bean.projectid = subject['projectid'];
+    bean.workregionid = subject['workregionid'];
+    bean.equipmentid = subject['equipmentid'];
+    bean.ownerid = subject['ownerid'];
     return bean;
   }
 }

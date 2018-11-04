@@ -24,10 +24,12 @@ class TabOne extends StatefulWidget {
 }
 
 class TabOneState extends State<TabOne> {
-  List<ConstructionBean> datas = [];
+  List<StatBean> detailReportList = [];
   List<StatBean> statDatas = [];
 
   bool loading = true;
+  bool loading2 = true;
+
   List<Widget> widgetList = List();
   static DateTime datenow = CacheUtil.getInstance().getTime() == null
       ? DateTime.now()
@@ -73,8 +75,8 @@ class TabOneState extends State<TabOne> {
   Widget build(BuildContext context) {
     var content;
 
-    if (datas.isEmpty) {
-      if (loading) {
+    if (detailReportList.isEmpty) {
+      if (loading || loading2) {
         content = new Center(
           child: new CircularProgressIndicator(),
         );
@@ -143,23 +145,7 @@ class TabOneState extends State<TabOne> {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: _buildHeader()),
     );
-    widgetList.add(
-      Container(
-        color: Colors.blue[100],
-        width: (MediaQuery.of(context).size.width),
-        height: 22.0,
-        child: Text("  按设备统计"),
-      ),
-    );
-    widgetList.add(
-      Padding(padding: new EdgeInsets.only(bottom: 20.0)),
-    );
-    widgetList.add(
-      new SizedBox(
-          height: 200.0,
-          width: (MediaQuery.of(context).size.width),
-          child: new DonutAutoLabelChart.withGivingData(statDatas,'total')),
-    );
+   
 
     widgetList.add(
       Container(
@@ -178,13 +164,33 @@ class TabOneState extends State<TabOne> {
   }
 
   Future getApiData() async {
-    print("get construction");
     var url = Constant.baseUrl +
-        '/api/v1/construction?start=' +
+        '/api/v1/construction/stat?start=' +
         utcStartTime.toString() +
         '&end=' +
         utcEndTime.toString() +
-        '&workregion=${widget.equipment.equipmentid}' +
+        '&equipmentid=${widget.equipment.equipmentid}'+
+        '&type=listByEquipment';
+    print(url);
+    var httpClient = new HttpClient();
+    var request = await httpClient.getUrl(Uri.parse(url));
+    var response = await request.close();
+    if (response.statusCode == 200) {
+      var jsonData = await response.transform(utf8.decoder).join();
+      setState(() {
+        detailReportList = StatBean.decodeData(jsonData);
+        loading = false;
+      });
+    }
+  }
+
+  Future getStatData() async {
+    var url = Constant.baseUrl +
+        '/api/v1/construction/stat?start=' +
+        utcStartTime.toString() +
+        '&end=' +
+        utcEndTime.toString() +
+        '&equipmentid=${widget.equipment.equipmentid}' +
         '&type=g_equipment_s_equipment';
     print(url);
     var httpClient = new HttpClient();
@@ -193,37 +199,18 @@ class TabOneState extends State<TabOne> {
     if (response.statusCode == 200) {
       var jsonData = await response.transform(utf8.decoder).join();
       setState(() {
-        datas = ConstructionBean.decodeData(jsonData);
-        loading = false;
-      });
-    }
-  }
-
-  Future getStatData() async {
-    print("get construction");
-    var url = Constant.baseUrl +
-        '/api/v1/construction/stat?start=' +
-        utcStartTime.toString() +
-        '&end=' +
-        utcEndTime.toString() +
-        '&workregion=${widget.equipment.equipmentid}';
-    print(url);
-    var httpClient = new HttpClient();
-    var request = await httpClient.getUrl(Uri.parse(url));
-    var response = await request.close();
-    if (response.statusCode == 200) {
-      var jsonData = await response.transform(utf8.decoder).join();
-      setState(() {
         statDatas = StatBean.decodeData(jsonData);
-        loading = false;
+        print("stat:");
+        print('$statDatas');
+        loading2 = false;
       });
     }
   }
 
   // 每个条目的信息
   buildContructionDetail() {
-    for (int i = 0; i < datas.length; i++) {
-      ConstructionBean data = datas[i];
+    for (int i = 0; i < detailReportList.length; i++) {
+      StatBean data = detailReportList[i];
       _buildRow(i, data);
     }
   }
@@ -419,7 +406,7 @@ class TabOneState extends State<TabOne> {
                   ),
                   new Container(
                     child: new Text(
-                      data.pieces.toString(),
+                      data.totalpieces.toString(),
                       style: new TextStyle(fontSize: 14.0, color: Colors.black),
                     ),
                   ),
@@ -480,15 +467,15 @@ class TabOneState extends State<TabOne> {
     );
   }
 
-  _buildRow(int i, ConstructionBean data) {
+  _buildRow(int i, StatBean data) {
     // var date = new DateTime.fromMillisecondsSinceEpoch(utc*1000);
     widgetList.add(new Container(
       child: new Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: <Widget>[
             OneRowOfDetail(i, Colors.grey),
-            OneRowOfDetail(data.equipmentid, Colors.black),
-            OneRowOfDetail(data.ownerid, Colors.black),
+            OneRowOfDetail(data.equipmentname, Colors.black),
+            OneRowOfDetail(data.ownername, Colors.black),
             OneRowOfDetail(data.pieces, Colors.black),
           ]),
       decoration: const BoxDecoration(

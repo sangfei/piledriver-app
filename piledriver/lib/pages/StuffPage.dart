@@ -54,7 +54,7 @@ class StuffPageState extends State<StuffPage> {
                       }),
                 ],
 
-                backgroundColor: Colors.amber[200],
+                backgroundColor: Colors.lightBlueAccent,
                 // title: titleWidget(),
                 title: new Text(
                   "员工列表",
